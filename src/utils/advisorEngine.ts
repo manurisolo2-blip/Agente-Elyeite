@@ -1,4 +1,4 @@
-export type ProductCategory = 'espacio' | 'piel' | 'prenda' | 'repuesto';
+export type ProductCategory = 'sillones' | 'mesas' | 'sillas' | 'espacio';
 
 export type StylePresetId = 'atelier' | 'botanical' | 'technical';
 
@@ -32,27 +32,27 @@ export const STYLE_PRESETS: Record<StylePresetId, StylePresetDefinition> = {
   },
   botanical: {
     id: 'botanical',
-    name: 'Botánica & Clínica',
+    name: 'Natural & Orgánico',
     fontDisplay: "'Fraunces', Georgia, serif",
     fontSans: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
     theme: {
       bgPrimary: '#F4F6F2',
       bgSecondary: '#E8ECE4',
       textPrimary: '#18241B',
-      accentColor: '#2D5A3F',
+      accentColor: '#4A5B45',
       hairlineColor: '#D3DCD0',
     },
   },
   technical: {
     id: 'technical',
-    name: 'Técnico & Urbano',
+    name: 'Arquitectura & Líneas',
     fontDisplay: "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif",
     fontSans: "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif",
     theme: {
       bgPrimary: '#F2F4F7',
       bgSecondary: '#E4E7EC',
       textPrimary: '#0F172A',
-      accentColor: '#D9381E',
+      accentColor: '#8C5835',
       hairlineColor: '#CBD5E1',
     },
   },
@@ -138,7 +138,7 @@ export const DEFAULT_BRAND_CONFIG: BrandConfig = {
       id: 'EY-SURE',
       name: 'Sillón Sure',
       price: '$ 890.000 ARS',
-      category: 'espacio',
+      category: 'sillones',
       features: [
         'Estructura robusta en madera maciza estacionada con terminación artesanal',
         'Tapizado en género de alto tránsito con tratamiento antimanchas, fresco y fácil de limpiar',
@@ -148,186 +148,69 @@ export const DEFAULT_BRAND_CONFIG: BrandConfig = {
       buyUrl: 'https://elyeite.com/productos/sillon-sure',
     },
     {
-      id: 'CR-02',
-      name: 'Lámpara de Pie Arco Travertino 2700K',
-      price: '$ 420.000 ARS',
-      category: 'espacio',
+      id: 'EY-SOFA-3C',
+      name: 'Sofá de 3 Cuerpos Lino Antimanchas',
+      price: '$ 1.650.000 ARS',
+      category: 'sillones',
       features: [
-        'Base esculpida en piedra travertino natural y arco de bronce cepillado',
-        'Globo difusor opal con LED cálido 2700K dimeable (1200 lúmenes)',
-        'Altura 165 cm: ilumina esquinas oscuras sin necesidad de obra eléctrica en techo',
+        'Profundidad de 95 cm con placas soft de alta densidad y rebote ergonómico envolvente',
+        'Fundas completamente desmontables y lavables en lino pesado con tratamiento antimanchas',
+        'Ideal para livings familiares de alto tránsito y convivencia con niños o mascotas',
       ],
-      imageUrl: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-02-lampara-arco-travertino',
+      imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=85',
+      buyUrl: 'https://elyeite.com',
     },
     {
-      id: 'CR-03',
-      name: 'Mesa Lateral Bloque Travertino & Roble',
-      price: '$ 340.000 ARS',
-      category: 'espacio',
+      id: 'EY-MESA-COMEDOR',
+      name: 'Mesa de Comedor Petiribí Macizo',
+      price: '$ 1.290.000 ARS',
+      category: 'mesas',
       features: [
-        'Tapa circular de piedra travertino apomazada de 45 cm de diámetro',
-        'Base trípode en roble ahumado macizo (52 cm de altura)',
-        'Ideal como mesa de apoyo junto a sillones bajos o camas',
+        'Tapa de 200 × 100 cm en madera noble de Petiribí macizo seleccionado',
+        'Lustre poliuretánico mate resistente a líquidos, calor y uso diario',
+        'Capacidad cómoda para 8 comensales con estructura de ensamble artesanal espigado',
       ],
-      imageUrl: 'https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-03-mesa-lateral-travertino',
+      imageUrl: 'https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?auto=format&fit=crop&w=900&q=85',
+      buyUrl: 'https://elyeite.com',
     },
     {
-      id: 'CR-04',
-      name: 'Alfombra Telar Pura Lana Virgen Cruda 200×300',
-      price: '$ 610.000 ARS',
-      category: 'espacio',
+      id: 'EY-MESA-RATONA',
+      name: 'Mesa Ratona Bloque Petiribí',
+      price: '$ 480.000 ARS',
+      category: 'mesas',
       features: [
-        'Tejida a mano en telar horizontal con 100% lana virgen patagónica sin teñir',
-        'Medida 200 × 300 cm de alto tránsito y aislación acústica/térmica natural',
-        'Unifica livings con piso de madera, porcelanato o cemento alisado',
+        'Madera maciza estacionada de 120 × 60 cm con ensamble ingletado continuo',
+        'Altura ergonómica de 40 cm para acompañar livings y sofás principales',
+        'Terminación al aceite y ceras naturales que realzan la veta viva de la madera',
       ],
-      imageUrl: 'https://images.unsplash.com/photo-1600166898405-da9535204843?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-04-alfombra-telar-lana',
+      imageUrl: 'https://images.unsplash.com/photo-1533090161767-e6ffed986b88?auto=format&fit=crop&w=900&q=85',
+      buyUrl: 'https://elyeite.com',
     },
     {
-      id: 'CR-05',
-      name: 'Difusor Ultrasónico Cerámica Gres & Cedro',
-      price: '$ 115.000 ARS',
-      category: 'espacio',
+      id: 'EY-SILLA-PANA',
+      name: 'Silla de Comedor Tapizada en Pana Antimanchas',
+      price: '$ 290.000 ARS',
+      category: 'sillas',
       features: [
-        'Carcasa artesanal en cerámica gres horneada a 1240°C color piedra',
-        'Incluye blend botánico de madera de cedro, bergamota y vetiver (30 ml)',
-        'Excelente opción de regalo de diseño para casa o estudio (corte automático 8h)',
+        'Estructura reforzada en petiribí macizo con espigas y encastres dobles',
+        'Asiento ergonómico con espuma alta densidad (28 kg) tapizado en pana antimanchas',
+        'Fácil mantenimiento y suavidad al tacto en tono neutro combinable con comedores diarios',
       ],
-      imageUrl: 'https://images.unsplash.com/photo-1602928321679-560bb453f190?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-05-difusor-ceramica-gres',
+      imageUrl: 'https://images.unsplash.com/photo-1580481077111-e6307137f223?auto=format&fit=crop&w=900&q=85',
+      buyUrl: 'https://elyeite.com',
     },
     {
-      id: 'CR-06',
-      name: 'Sérum Botánico Hialurónico 2% + Niacinamida 5%',
-      price: '$ 48.500 ARS',
-      category: 'piel',
+      id: 'EY-POLTRONA-BOUCLE',
+      name: 'Poltrona Individual Bouclé Crudo',
+      price: '$ 790.000 ARS',
+      category: 'sillones',
       features: [
-        'Ácido hialurónico de doble peso molecular para hidratación profunda sin grasitud',
-        'Niacinamida al 5% que calma rojeces, equilibra poros y devuelve luminosidad',
-        'Frasco gotero ámbar 30 ml libre de fragancia, apto piel sensible o deshidratada',
+        'Diseño compacto de 78 cm de ancho, perfecto para dormitorio, estudio o rincón de lectura',
+        'Tapizado envolvente en bouclé crudo texturado de alto tránsito',
+        'Base con patas cónicas en madera noble a la vista con lustre natural mate',
       ],
-      imageUrl: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-06-serum-hialuronico-niacinamida',
-    },
-    {
-      id: 'CR-07',
-      name: 'Emulsión Barrera Ceramidas III & Escualano Puro',
-      price: '$ 54.000 ARS',
-      category: 'piel',
-      features: [
-        'Complejo bio-idéntico de Ceramidas III y escualano vegetal de oliva (50 ml)',
-        'Repara la barrera cutánea frente a tirantez, clima frío o descamación',
-        'Textura sedosa no comedogénica para sellar la rutina de día y de noche',
-      ],
-      imageUrl: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-07-emulsion-barrera-ceramidas',
-    },
-    {
-      id: 'CR-08',
-      name: 'Contorno de Ojos Péptidos de Cobre & Cafeína',
-      price: '$ 44.000 ARS',
-      category: 'piel',
-      features: [
-        'Cafeína pura al 3% y péptidos descongestivos para bolsas y ojeras vasculares',
-        'Aplicador metálico frío que desinflama la mirada en 60 segundos (15 ml)',
-        'Ideal para signos de cansancio frente a pantallas o piel fina en párpados',
-      ],
-      imageUrl: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-08-contorno-ojos-peptidos',
-    },
-    {
-      id: 'CR-09',
-      name: 'Óleo Limpiador Botánico Jojoba & Camelia',
-      price: '$ 41.000 ARS',
-      category: 'piel',
-      features: [
-        'Emulsiona con agua tibia retirando protector solar y maquillaje sin irritar',
-        'Prensado en frío de jojoba dorada y camelia japonesa (120 ml)',
-        'Deja la piel elástica y limpia sin alterar el manto hidrolipídico',
-      ],
-      imageUrl: 'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-09-oleo-limpiador-jojoba',
-    },
-    {
-      id: 'CR-10',
-      name: 'Sobrecamisa Sastrera Lana Merino Patagónica',
-      price: '$ 310.000 ARS',
-      category: 'prenda',
-      features: [
-        '100% lana merino superfina (280 g/m²) en color Gris Grafito, no pica ni hace peeling',
-        'Corte boxy sastrero relajado disponible en talles S, M, L y XL',
-        'Funciona como tercera prenda urbana sobre remera blanca o camisa oxford',
-      ],
-      imageUrl: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-10-sobrecamisa-merino',
-    },
-    {
-      id: 'CR-11',
-      name: 'Pantalón Cargo Sastrero Gabardina Orgánica 10 oz',
-      price: '$ 195.000 ARS',
-      category: 'prenda',
-      features: [
-        'Gabardina esmerilada de algodón orgánico 10 oz en tono Arena Piedra',
-        'Corte recto con pinzas sastreras y bolsillos laterales planos (talles 38 al 46)',
-        'Calce cómodo y estructurado para uso diario en estudio o viaje',
-      ],
-      imageUrl: 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-11-pantalon-cargo-gabardina',
-    },
-    {
-      id: 'CR-12',
-      name: 'Sweater Cuello Medio Cashmere & Merino Crudo',
-      price: '$ 265.000 ARS',
-      category: 'prenda',
-      features: [
-        'Hilado noble 70% lana merino superfina + 30% cashmere en punto inglés',
-        'Talles S, M, L y XL con hombro caído arquitectónico y puños acanalados',
-        'Regalo infalible de invierno y media estación con packaging de lienzo',
-      ],
-      imageUrl: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-12-sweater-cashmere-merino',
-    },
-    {
-      id: 'CR-13',
-      name: 'Tote Bag Cuero Vacuno Curtido Vegetal & Lona',
-      price: '$ 230.000 ARS',
-      category: 'prenda',
-      features: [
-        'Lona impermeable de 16 oz combinada con manijas y base en cuero vacuno suela',
-        'Compartimento acolchado para notebook de hasta 16 pulgadas (42×35×14 cm)',
-        'Excelente regalo unisex de uso diario o escapada de fin de semana',
-      ],
-      imageUrl: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-13-tote-bag-cuero-vegetal',
-    },
-    {
-      id: 'CR-14',
-      name: 'Kit Service Grupo E61: Junta Silicona 8.5mm + Ducha IMS',
-      price: '$ 68.000 ARS',
-      category: 'repuesto',
-      features: [
-        'Junta de silicona roja Ø 73×57×8.5mm grado alimenticio que no se cristaliza',
-        'Membrana difusora IMS de acero inoxidable 200 µm para extracción pareja',
-        'Elimina fugas laterales en cafeteras espresso grupo E61 de 58 mm',
-      ],
-      imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-14-kit-service-e61-ims',
-    },
-    {
-      id: 'CR-15',
-      name: 'Portafiltro Naked 58mm Latón CNC & Mango Nogal',
-      price: '$ 145.000 ARS',
-      category: 'repuesto',
-      features: [
-        'Cabezal sin fondo mecanizado CNC en latón cromado con aletas de 6.2mm (E61)',
-        'Incluye canasto de precisión de 18g y mango ergonómico en madera de nogal',
-        'Permite diagnosticar canalización en vivo y obtener crema densa',
-      ],
-      imageUrl: 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?auto=format&fit=crop&w=900&q=85',
-      buyUrl: 'https://casario.ar/comprar/cr-15-portafiltro-naked-58mm',
+      imageUrl: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=900&q=85',
+      buyUrl: 'https://elyeite.com',
     },
   ],
 };
@@ -353,7 +236,7 @@ export function buildAdvisorSystemInstruction(brandConfig: BrandConfig): string 
   );
 
   return `# ROL Y OBJETIVO
-Actuás como el Asesor de Compras Multimodal Oficial de la marca definida en \`BRAND_CONFIG\` (${brandConfig.brandName}). Tu único objetivo es atender consultas 24/7 en menos de 2 segundos, analizar fotos subidas por el cliente (de su espacio, su rostro/piel, una prenda o un repuesto) y recomendarle con precisión quirúrgica el o los artículos exactos del catálogo oficial, llevándolo directo al link de compra.
+Actuás como el Asesor de Compras Multimodal Oficial de la mueblería artesanal ${brandConfig.brandName}. Tu único objetivo es atender consultas 24/7 en menos de 2 segundos, analizar fotos subidas por el cliente (de su living, comedor, rincón de lectura o espacio a equipar) y recomendarle con precisión quirúrgica el o los muebles exactos del catálogo oficial de El Yeite, llevándolo directo al link de compra.
 
 # CATÁLOGO OFICIAL Y POLÍTICAS (BRAND_CONFIG)
 \`\`\`json
@@ -361,13 +244,13 @@ ${catalogJson}
 \`\`\`
 
 # REGLAS ESTRICTAS DE OPERACIÓN (CERO ALUCINACIÓN)
-1. **Fidelidad Absoluta al Catálogo:** Usá EXCLUSIVAMENTE los productos provistos en el bloque \`BRAND_CONFIG.products\`. Prohibido inventar productos, talles, medidas, precios, descuentos o URLs. Si preguntan por algo que no existe en el catálogo, ofrecé la alternativa más cercana disponible explicando honestamente la diferencia.
-2. **Diagnóstico Visual Multimodal:** Cuando el comprador adjunte una imagen:
-   - Identificá en 1 línea qué estás viendo en la foto (ej. iluminación y espacio disponible, tono/textura, estilo o pieza técnica) y colocalo en \`visualAnalysis\`.
+1. **Fidelidad Absoluta al Catálogo:** Usá EXCLUSIVAMENTE los muebles provistos en el bloque \`BRAND_CONFIG.products\` (Sillón Sure, Sofá de 3 Cuerpos, Mesa de Comedor Petiribí, Mesa Ratona Bloque, Silla de Comedor Tapizada, Poltrona Bouclé). Prohibido inventar productos, electrodomésticos, ropa o repuestos. Si preguntan por algo que no existe en el catálogo, ofrecé el mueble real más cercano disponible explicando honestamente la diferencia.
+2. **Diagnóstico Visual Multimodal de Interiores:** Cuando el comprador adjunte una foto de su ambiente:
+   - Identificá en 1 línea qué estás viendo en la foto (espacio disponible, iluminación, tipo de piso, distribución o rincón libre) y colocalo en \`visualAnalysis\`.
    - Si el comprador NO adjuntó ninguna imagen y solo envió texto, dejá \`visualAnalysis\` estrictamente en \`null\`.
-   - Cruzá esos detalles visuales con las \`features\` y especificaciones de \`BRAND_CONFIG.products\`.
-   - Seleccioná únicamente los **1 o 2 productos** que mejor resuelvan su necesidad real y explicá en máximo 2 líneas por qué encajan con su foto.
-3. **Tono y Cierre Comercial:** Hablá en español rioplatense (voseo natural, cálido, ágil y directo, como un vendedor experto de local exclusivo, sin frases robóticas ni introducciones largas). Cerrá siempre tu respuesta con una pregunta corta en \`closingQuestion\` que invite a concretar la compra o despejar la última duda.
+   - Cruzá esos detalles visuales con las \`features\` y medidas de \`BRAND_CONFIG.products\`.
+   - Seleccioná únicamente los **1 o 2 muebles** que mejor resuelvan su necesidad y explicá en máximo 2 líneas por qué encajan con su foto.
+3. **Tono y Cierre Comercial:** Hablá en español rioplatense (voseo natural, cálido, ágil y directo, como un ebanista y diseñador de salón de muebles exclusivos). Cerrá siempre tu respuesta con una pregunta corta en \`closingQuestion\` que invite a concretar la compra o consultar por géneros antimanchas y medidas exactas.
 
 # FORMATO DE SALIDA (JSON ESTRUCTURADO)
 Respondé SIEMPRE devolviendo únicamente un objeto JSON válido con esta estructura exacta:
@@ -392,49 +275,36 @@ export function matchCatalogProducts(
   query: string,
   visualClues: string | undefined,
   brandConfig: BrandConfig
-): { matched: BrandProduct[]; isExactCategoryMatch: boolean; detectedCategory: ProductCategory; isGiftQuery: boolean } {
+): { matched: BrandProduct[]; isExactCategoryMatch: boolean; detectedCategory: ProductCategory; isAntimanchasQuery: boolean } {
   const combined = `${query} ${visualClues || ''}`.toLowerCase();
-  const isGiftQuery = combined.includes('regalo') || combined.includes('regalar') || combined.includes('obsequio');
-
-  if (isGiftQuery) {
-    const giftProducts = brandConfig.products.filter((p) =>
-      p.features.some((f) => f.toLowerCase().includes('regalo')) || p.id === 'CR-05' || p.id === 'CR-12' || p.id === 'CR-13'
-    );
-    if (giftProducts.length > 0) {
-      return {
-        matched: giftProducts.slice(0, 2),
-        isExactCategoryMatch: true,
-        detectedCategory: giftProducts[0].category,
-        isGiftQuery: true,
-      };
-    }
-  }
+  const isAntimanchasQuery =
+    combined.includes('antimancha') ||
+    combined.includes('antimanchas') ||
+    combined.includes('género') ||
+    combined.includes('genero') ||
+    combined.includes('tela') ||
+    combined.includes('telas') ||
+    combined.includes('limpiar') ||
+    combined.includes('lavar');
 
   const categoryKeywords: Record<ProductCategory, string[]> = {
+    sillones: [
+      'sillón', 'sillon', 'sofá', 'sofa', 'poltrona', 'cuerpo', 'cuerpos', 'living', 'estar',
+      'rincon', 'rincón', 'lectura', 'esquina', 'sure', 'boucle', 'bouclé', 'lino', 'relax', 'descanso',
+    ],
+    mesas: [
+      'mesa', 'mesas', 'ratona', 'comedor', 'madera', 'petiribí', 'petiribi', 'comensales', 'tapa',
+      'almuerzo', 'cena', 'bloque', 'centro',
+    ],
+    sillas: [
+      'silla', 'sillas', 'pana', 'asiento', 'respaldo', 'comedor', 'tapizada', 'tapizadas',
+    ],
     espacio: [
-      'living', 'rincón', 'rincon', 'esquina', 'sillón', 'sillon', 'lámpara', 'lampara',
-      'luz', 'iluminación', 'iluminacion', 'espacio', 'madera', 'petiribí', 'petiribi',
-      'travertino', 'lectura', 'ambiente', 'decoración', 'deco', 'mueble', 'mesa', 'alfombra', 'difusor',
-      'sure', 'yeite', 'antimanchas', 'telas',
-    ],
-    piel: [
-      'piel', 'rostro', 'cara', 'sérum', 'serum', 'hialurónico', 'hialuronico',
-      'niacinamida', 'ceramidas', 'crema', 'emulsión', 'emulsion', 'tirante',
-      'rojez', 'rojiza', 'deshidratada', 'seca', 'sensible', 'hidratación', 'ojos', 'ojeras', 'óleo', 'limpiador',
-    ],
-    prenda: [
-      'prenda', 'ropa', 'camisa', 'sobrecamisa', 'campera', 'chaqueta', 'merino',
-      'lana', 'pantalón', 'pantalon', 'cargo', 'gabardina', 'talle', 'modelo', 'look', 'outfit',
-      'sastrero', 'sastrera', 'abrigo', 'vestir', 'sweater', 'cashmere', 'tote', 'bolso',
-    ],
-    repuesto: [
-      'repuesto', 'cafetera', 'espresso', 'e61', 'junta', 'silicona', 'ducha', 'ims',
-      'portafiltro', 'naked', '58mm', 'pierde agua', 'goteo', 'presión', 'presion',
-      'café', 'cafe', 'grupo', 'canasto',
+      'espacio', 'ambiente', 'casa', 'departamento', 'mueble', 'muebles', 'deco', 'decoración',
     ],
   };
 
-  let bestCategory: ProductCategory = 'espacio';
+  let bestCategory: ProductCategory = 'sillones';
   let maxCatScore = 0;
 
   for (const [cat, words] of Object.entries(categoryKeywords) as [ProductCategory, string[]][]) {
@@ -464,6 +334,30 @@ export function matchCatalogProducts(
         score += 3;
       }
     }
+
+    if (isAntimanchasQuery && searchable.includes('antimanchas')) {
+      score += 6;
+    }
+
+    if ((combined.includes('sure') || combined.includes('1.30') || combined.includes('rincon') || combined.includes('rincón')) && product.id === 'EY-SURE') {
+      score += 10;
+    }
+    if ((combined.includes('familiar') || combined.includes('chicos') || combined.includes('mascotas') || combined.includes('3 cuerpos')) && product.id === 'EY-SOFA-3C') {
+      score += 10;
+    }
+    if ((combined.includes('comedor') || combined.includes('8 comensales') || combined.includes('200')) && product.id === 'EY-MESA-COMEDOR') {
+      score += 10;
+    }
+    if ((combined.includes('ratona') || combined.includes('centro') || combined.includes('baja')) && product.id === 'EY-MESA-RATONA') {
+      score += 10;
+    }
+    if ((combined.includes('silla') || combined.includes('sillas') || combined.includes('pana')) && product.id === 'EY-SILLA-PANA') {
+      score += 10;
+    }
+    if ((combined.includes('boucle') || combined.includes('bouclé') || combined.includes('poltrona') || combined.includes('dormitorio') || combined.includes('estudio')) && product.id === 'EY-POLTRONA-BOUCLE') {
+      score += 10;
+    }
+
     return { product, score };
   });
 
@@ -473,17 +367,17 @@ export function matchCatalogProducts(
   if (top.length > 0) {
     return {
       matched: top,
-      isExactCategoryMatch: maxCatScore > 0,
+      isExactCategoryMatch: maxCatScore > 0 || isAntimanchasQuery,
       detectedCategory: top[0].category,
-      isGiftQuery: false,
+      isAntimanchasQuery,
     };
   }
 
   return {
     matched: brandConfig.products.slice(0, 2),
     isExactCategoryMatch: false,
-    detectedCategory: 'espacio',
-    isGiftQuery: false,
+    detectedCategory: 'sillones',
+    isAntimanchasQuery: false,
   };
 }
 
@@ -546,7 +440,7 @@ export function sanitizeAdvisorResponse(
           ? rec.matchReason.trim()
           : fallback.recommendedProducts.find((fp) => fp.id === catalogProduct.id)?.matchReason ||
             catalogProduct.features[0] ||
-            'Seleccionado del catálogo oficial por compatibilidad exacta con tu consulta.';
+            'Pieza artesanal seleccionada del catálogo oficial de El Yeite por compatibilidad exacta.';
 
       validProducts.push({
         id: catalogProduct.id,
@@ -584,7 +478,7 @@ export function generateDeterministicAdvisorResponse(
   hasImage: boolean,
   visualClues?: string
 ): AdvisorStructuredOutput {
-  const { matched, isExactCategoryMatch, detectedCategory, isGiftQuery } = matchCatalogProducts(
+  const { matched, isExactCategoryMatch, detectedCategory, isAntimanchasQuery } = matchCatalogProducts(
     query,
     visualClues,
     brandConfig
@@ -596,48 +490,50 @@ export function generateDeterministicAdvisorResponse(
   if (hasImage) {
     if (visualClues && visualClues.trim().length > 0) {
       visualAnalysis = visualClues.trim();
-    } else if (detectedCategory === 'espacio') {
+    } else if (detectedCategory === 'mesas' || query.toLowerCase().includes('comedor')) {
       visualAnalysis =
-        'Veo en tu foto un ambiente con luz tenue y rincón disponible de ~1.20m que pide la presencia del Sillón Sure en madera maciza e iluminación 2700K.';
-    } else if (detectedCategory === 'piel') {
+        'Observo un área de comedor con buena luz que pide la calidez de la Mesa en Petiribí macizo de 200cm junto a sillas tapizadas.';
+    } else if (query.toLowerCase().includes('familiar') || query.toLowerCase().includes('chicos') || query.toLowerCase().includes('mascotas')) {
       visualAnalysis =
-        'Identifico signos de deshidratación superficial y leve reactividad que responden bárbaro a Hialurónico 2% + Ceramidas III.';
-    } else if (detectedCategory === 'prenda') {
+        'Detecto un living familiar amplio de alto tránsito donde el Sofá de 3 Cuerpos con fundas lavables y género antimanchas resuelve confort y durabilidad.';
+    } else if (query.toLowerCase().includes('dormitorio') || query.toLowerCase().includes('estudio')) {
       visualAnalysis =
-        'Observo una base neutra urbana que cobra estructura al sumar una tercera prenda sastrera en lana merino patagónica.';
+        'Veo un rincón compacto de menos de 1 metro que cobra protagonismo y textura con la Poltrona Bouclé Crudo.';
     } else {
       visualAnalysis =
-        'Detecto un grupo espresso E61 de 58mm con desgaste en el sello de caucho que requiere junta de silicona 8.5mm y ducha IMS.';
+        'Veo en tu foto un ambiente con luz tenue y rincón disponible de ~1.30m que pide la presencia del Sillón Sure en madera maciza e iluminación cálida.';
     }
   }
 
   let advisorMessage: string;
-  if (isGiftQuery) {
-    advisorMessage = `Para quedar impecable con un regalo de autor, te separé las dos piezas más elegidas de ${brandConfig.brandName}: nuestro Difusor en Cerámica Gres con blend de cedro y el Sweater en Cashmere & Merino Crudo. Recorré con tranquilidad y contame para quién es.`;
+  const qLower = query.toLowerCase();
+
+  if (isAntimanchasQuery) {
+    advisorMessage = `Para el uso diario sin preocupaciones en ${brandConfig.brandName}, trabajamos géneros de alto tránsito con tratamiento antimanchas y fundas desmontables lavables. El Sofá de 3 Cuerpos y el Sillón Sure son nuestras piezas más resistentes.`;
   } else if (!isExactCategoryMatch && query.trim().length > 0) {
-    advisorMessage = `Te soy 100% honesto: ese artículo específico no está en nuestro catálogo oficial de ${brandConfig.brandName}. Te seleccioné las alternativas reales más cercanas disponibles en stock para que veas sus especificaciones exactas.`;
-  } else if (detectedCategory === 'espacio') {
-    advisorMessage = `Para levantar ese espacio sin hacer obra, la dupla del Sillón Sure en madera maciza con la Lámpara Arco en piedra travertino 2700K te transforma el rincón al instante. Ambos están listos para envío.`;
-  } else if (detectedCategory === 'piel') {
-    advisorMessage = `Para devolverle confort y luz a tu piel desde hoy, te recomiendo combinar el Sérum de Hialurónico 2% + Niacinamida 5% con la Emulsión de Ceramidas III. Hidratan profundo y sellan la barrera sin dejar residuo pesado.`;
-  } else if (detectedCategory === 'prenda') {
-    advisorMessage = `En indumentaria trabajamos moldería sastrera relajada (talles S al XL arriba y 38 al 46 en pantalón). La Sobrecamisa de Lana Merino 280g y el Cargo en Gabardina 10 oz calzan impecable y te visten todo el año.`;
+    advisorMessage = `Te soy 100% honesto: en ${brandConfig.brandName} nos especializamos exclusivamente en muebles de autor y tapicería a medida en maderas nobles. Te seleccioné las piezas oficiales más afines a tu búsqueda para que veas sus especificaciones.`;
+  } else if (qLower.includes('comedor') || detectedCategory === 'mesas') {
+    advisorMessage = `Para armar un comedor sólido y de líneas puras, la combinación de la Mesa de Comedor en Petiribí Macizo (200x100 cm) con las Sillas Tapizadas en Pana Antimanchas es la opción predilecta de nuestros clientes.`;
+  } else if (qLower.includes('familiar') || qLower.includes('chicos') || qLower.includes('sofa') || qLower.includes('sofá')) {
+    advisorMessage = `Para un living familiar de uso intenso, nuestro Sofá de 3 Cuerpos ofrece 95 cm de profundidad envolvente con fundas desmontables lavables en lino antimanchas, pensado para disfrutar sin miedo a las manchas.`;
+  } else if (qLower.includes('boucle') || qLower.includes('bouclé') || qLower.includes('poltrona') || qLower.includes('dormitorio')) {
+    advisorMessage = `Para ese rincón de lectura o dormitorio, la Poltrona Individual Bouclé Crudo aporta calidez textil y ergonomía en solo 78 cm de ancho, con patas en madera noble a la vista.`;
   } else {
-    advisorMessage = `Para solucionar la pérdida de presión en tu cafetera E61, el Kit de Junta de Silicona de 8.5mm + Ducha IMS sella a 9 bares sin resecarse, y el Portafiltro Naked de 58mm te permite controlar la extracción en vivo.`;
+    advisorMessage = `Para resolver ese espacio con calidez artesanal, la dupla del Sillón Sure en madera maciza con la Mesa Ratona Bloque en Petiribí te transforma el living con proporciones justas y fabricación a medida.`;
   }
 
   const recommendedProducts: RecommendedProductOutput[] = selected.map((prod) => ({
     id: prod.id,
-    matchReason: prod.features[0] || `Pieza oficial de ${brandConfig.brandName} con disponibilidad inmediata.`,
+    matchReason: prod.features[0] || `Mueble oficial de ${brandConfig.brandName} fabricado en maderas nobles con terminación artesanal.`,
     name: prod.name,
     price: prod.price,
     imageUrl: prod.imageUrl,
     buyUrl: prod.buyUrl,
   }));
 
-  const closingQuestion = isGiftQuery
-    ? '¿Lo buscás con packaging de regalo listo para entregar hoy en CABA/GBA o envío al interior?'
-    : '¿Lo buscás para envío inmediato hoy mismo o preferís chequear medidas y talles exactos?';
+  const closingQuestion = isAntimanchasQuery
+    ? '¿Te gustaría que te enviemos el muestrario digital de géneros antimanchas y tonos disponibles?'
+    : '¿Lo buscás para entrega programada en tu domicilio o preferís chequear medidas exactas de tu espacio?';
 
   return {
     visualAnalysis,

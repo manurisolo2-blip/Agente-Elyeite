@@ -174,8 +174,8 @@ async function startServer() {
       const promptText =
         userMessage ||
         (hasImage
-          ? 'Analizá esta foto y recomendame el o los productos exactos de BRAND_CONFIG.products que mejor resuelvan mi necesidad.'
-          : 'Hola, necesito asesoramiento sobre el catálogo.');
+          ? 'Analizá esta foto y recomendame el o los muebles exactos de BRAND_CONFIG.products que mejor resuelvan mi espacio.'
+          : 'Hola, necesito asesoramiento sobre el catálogo de muebles.');
 
       const fullPromptText =
         hasImage && body.visualClues && !resolvedBase64
