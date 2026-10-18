@@ -96,6 +96,60 @@ export interface RecommendedProductOutput {
   buyUrl: string;
 }
 
+export interface ChatHistoryTurn {
+  role: 'user' | 'model';
+  text: string;
+}
+
+export function formatGeminiHistory(
+  rawHistory?: ChatHistoryTurn[]
+): Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> {
+  if (!Array.isArray(rawHistory) || rawHistory.length === 0) {
+    return [];
+  }
+
+  const sanitized: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
+
+  for (const turn of rawHistory) {
+    if (!turn || typeof turn !== 'object') continue;
+    let text = '';
+    if (typeof turn.text === 'string') {
+      text = turn.text.trim();
+    } else if (turn.text) {
+      try {
+        text = JSON.stringify(turn.text);
+      } catch (_e) {
+        text = '';
+      }
+    }
+    if (!text) continue;
+
+    const role: 'user' | 'model' = turn.role === 'model' ? 'model' : 'user';
+
+    // Gemini API requires the first turn to have role 'user'
+    if (sanitized.length === 0) {
+      if (role === 'user') {
+        sanitized.push({ role: 'user', parts: [{ text }] });
+      }
+      continue;
+    }
+
+    // Gemini API requires alternating roles
+    const lastRole = sanitized[sanitized.length - 1].role;
+    if (role !== lastRole) {
+      sanitized.push({ role, parts: [{ text }] });
+    }
+  }
+
+  // Because the upcoming request turn appended by the caller is ALWAYS 'user',
+  // historyContents MUST end with 'model' (or be empty) so roles strictly alternate.
+  while (sanitized.length > 0 && sanitized[sanitized.length - 1].role === 'user') {
+    sanitized.pop();
+  }
+
+  return sanitized.slice(-8);
+}
+
 export interface AdvisorStructuredOutput {
   visualAnalysis: string | null;
   advisorMessage: string;
@@ -484,42 +538,235 @@ export function generateDeterministicAdvisorResponse(
     brandConfig
   );
 
-  const selected = matched.slice(0, 2);
+  const qLower = query.toLowerCase();
+  const textAll = `${qLower} ${(visualClues || '').toLowerCase()}`;
+
+  // Specific furniture detection
+  const isSure =
+    textAll.includes('sure') ||
+    textAll.includes('1.30') ||
+    textAll.includes('1.50') ||
+    textAll.includes('rincon') ||
+    textAll.includes('rincón') ||
+    (textAll.includes('sillon') && !textAll.includes('sofa') && !textAll.includes('3 cuerpos'));
+
+  const isSofa3c =
+    textAll.includes('sofa') ||
+    textAll.includes('sofá') ||
+    textAll.includes('3 cuerpos') ||
+    textAll.includes('tres cuerpos') ||
+    textAll.includes('familiar') ||
+    textAll.includes('chicos') ||
+    textAll.includes('mascotas');
+
+  const isMesaComedor =
+    textAll.includes('mesa de comedor') ||
+    (textAll.includes('comedor') && !textAll.includes('silla')) ||
+    textAll.includes('8 comensales') ||
+    (textAll.includes('200') && textAll.includes('mesa'));
+
+  const isMesaRatona =
+    textAll.includes('ratona') ||
+    textAll.includes('mesa baja') ||
+    textAll.includes('mesa centro') ||
+    textAll.includes('mesa de centro') ||
+    textAll.includes('bloque') ||
+    textAll.includes('120x60');
+
+  const isSilla =
+    textAll.includes('silla') ||
+    textAll.includes('sillas') ||
+    textAll.includes('pana');
+
+  const isPoltrona =
+    textAll.includes('poltrona') ||
+    textAll.includes('boucle') ||
+    textAll.includes('bouclé') ||
+    textAll.includes('dormitorio') ||
+    textAll.includes('estudio');
+
+  // Topic intents
+  const isMedidas =
+    textAll.includes('medida') ||
+    textAll.includes('medidas') ||
+    textAll.includes('dimension') ||
+    textAll.includes('dimensiones') ||
+    textAll.includes('cuanto mide') ||
+    textAll.includes('cuánto mide') ||
+    textAll.includes('ancho') ||
+    textAll.includes('alto') ||
+    textAll.includes('profundidad') ||
+    textAll.includes('largo') ||
+    textAll.includes('centimetros') ||
+    textAll.includes('centímetros') ||
+    textAll.includes(' cm ') ||
+    textAll.endsWith(' cm') ||
+    textAll.includes('metros');
+
+  const isTelas =
+    isAntimanchasQuery ||
+    textAll.includes('tela') ||
+    textAll.includes('telas') ||
+    textAll.includes('genero') ||
+    textAll.includes('género') ||
+    textAll.includes('tapizado') ||
+    textAll.includes('tapiceria') ||
+    textAll.includes('tapicería') ||
+    textAll.includes('limpiar') ||
+    textAll.includes('lavar') ||
+    textAll.includes('funda') ||
+    textAll.includes('fundas');
+
+  const isEnvios =
+    textAll.includes('envio') ||
+    textAll.includes('envíos') ||
+    textAll.includes('envios') ||
+    textAll.includes('flete') ||
+    textAll.includes('fletes') ||
+    textAll.includes('entrega') ||
+    textAll.includes('entregas') ||
+    textAll.includes('despacho') ||
+    textAll.includes('interior') ||
+    textAll.includes('pais') ||
+    textAll.includes('país') ||
+    textAll.includes('provincia') ||
+    textAll.includes('localidad');
+
+  const isCuotas =
+    textAll.includes('cuota') ||
+    textAll.includes('cuotas') ||
+    textAll.includes('pago') ||
+    textAll.includes('pagos') ||
+    textAll.includes('tarjeta') ||
+    textAll.includes('tarjetas') ||
+    textAll.includes('interes') ||
+    textAll.includes('interés') ||
+    textAll.includes('financiacion') ||
+    textAll.includes('financiación') ||
+    textAll.includes('descuento') ||
+    textAll.includes('transferencia');
+
+  // Find products helper
+  const getProduct = (id: string) =>
+    brandConfig.products.find((p) => p.id === id) || brandConfig.products[0];
+
+  let selected: BrandProduct[] = [];
+  let advisorMessage = '';
+  let closingQuestion = '¿Lo buscás para entrega programada en tu domicilio o preferís chequear medidas exactas de tu espacio?';
+
+  if (!isExactCategoryMatch && query.trim().length > 0 && !isMedidas && !isTelas && !isEnvios && !isCuotas) {
+    selected = [getProduct('EY-SURE'), getProduct('EY-SOFA-3C')];
+    advisorMessage = `Te soy 100% honesto: en ${brandConfig.brandName} nos especializamos exclusivamente en muebles de autor y tapicería a medida en maderas nobles. Te seleccioné las piezas oficiales más afines a tu búsqueda para que veas sus especificaciones.`;
+    closingQuestion = '¿Buscás equipar algún ambiente en particular como living, comedor o rincón de lectura?';
+  } else if (isMedidas && isTelas) {
+    if (isSure) {
+      selected = [getProduct('EY-SURE'), getProduct('EY-MESA-RATONA')];
+      advisorMessage = 'El Sillón Sure mide 78 cm de ancho, 82 cm de profundidad y 74 cm de altura total (ideal para espacios de 1.30 a 1.50 m). Viene tapizado en género de alto tránsito con tratamiento antimanchas que repele líquidos y se limpia fácilmente con un paño húmedo.';
+      closingQuestion = '¿Querés que te preparemos la cotización con envío a tu localidad o preferís elegir el color del tapizado?';
+    } else if (isSofa3c) {
+      selected = [getProduct('EY-SOFA-3C'), getProduct('EY-MESA-RATONA')];
+      advisorMessage = 'El Sofá de 3 Cuerpos tiene 215 cm de largo y 95 cm de profundidad con placas soft de alta densidad. Sus fundas son completamente desmontables y lavables en lino pesado con tratamiento antimanchas.';
+      closingQuestion = '¿Te gustaría verificar si el largo de 215 cm se adapta bien a la pared principal de tu living?';
+    } else {
+      selected = [getProduct('EY-SURE'), getProduct('EY-SOFA-3C')];
+      advisorMessage = 'En El Yeite combinamos medidas ergonómicas con géneros antimanchas de alto tránsito: el Sillón Sure mide 78x82 cm para rincones compactos, y el Sofá 3 Cuerpos mide 215x95 cm con fundas desmontables lavables.';
+      closingQuestion = '¿Querés que te enviemos las medidas detalladas de plano y el muestrario de telas?';
+    }
+  } else if (isMedidas) {
+    if (isSure) {
+      selected = [getProduct('EY-SURE'), getProduct('EY-MESA-RATONA')];
+      advisorMessage = 'El Sillón Sure tiene una proporción ergonómica de 78 cm de ancho, 82 cm de profundidad y 74 cm de alto (asiento a 44 cm). Está diseñado específicamente para lucirse en rincones de 1.30 a 1.50 metros sin obstaculizar el paso.';
+      closingQuestion = '¿Tenés medido el rincón donde pensás ubicarlo para verificar la circulación?';
+    } else if (isSofa3c) {
+      selected = [getProduct('EY-SOFA-3C'), getProduct('EY-MESA-RATONA')];
+      advisorMessage = 'El Sofá de 3 Cuerpos mide 215 cm de ancho, 95 cm de profundidad total y 85 cm de alto, brindando un asiento amplio y envolvente con placas soft de 28 kg/m³.';
+      closingQuestion = '¿Buscás complementar el sofá con una mesa ratona o poltronas individuales?';
+    } else if (isMesaComedor) {
+      selected = [getProduct('EY-MESA-COMEDOR'), getProduct('EY-SILLA-PANA')];
+      advisorMessage = 'La Mesa de Comedor en Petiribí Macizo mide 200 × 100 cm con una altura estándar de 76 cm. Su tapa maciza de 2 pulgadas alberga cómodamente a 8 comensales con gran estabilidad.';
+      closingQuestion = '¿Querés consultar por medidas especiales de mesa o por el juego completo con sillas tapizadas?';
+    } else if (isMesaRatona) {
+      selected = [getProduct('EY-MESA-RATONA'), getProduct('EY-SURE')];
+      advisorMessage = 'La Mesa Ratona Bloque en Petiribí mide 120 × 60 cm y tiene 40 cm de altura, la cota óptima para integrarse frente a sofás o sillones sin obstaculizar la vista ni el paso.';
+      closingQuestion = '¿Te gustaría saber los acabados en cera mate y tiempos de entrega de la mesa ratona?';
+    } else if (isPoltrona) {
+      selected = [getProduct('EY-POLTRONA-BOUCLE'), getProduct('EY-MESA-RATONA')];
+      advisorMessage = 'La Poltrona Individual Bouclé Crudo mide 78 cm de ancho, 80 cm de profundidad y 76 cm de altura total. Es una pieza sumamente confortable que requiere menos de 1 metro cuadrado libre.';
+      closingQuestion = '¿Querés confirmar las medidas de tu ambiente para asegurarnos de que encaje con holgura?';
+    } else if (isSilla) {
+      selected = [getProduct('EY-SILLA-PANA'), getProduct('EY-MESA-COMEDOR')];
+      advisorMessage = 'La Silla de Comedor Tapizada mide 48 cm de ancho, 52 cm de profundidad y 84 cm de altura de respaldo (asiento ergonómico a 47 cm). Su estructura reforzada en petiribí soporta uso continuo.';
+      closingQuestion = '¿Cuántas sillas necesitás para tu mesa de comedor?';
+    } else {
+      selected = [getProduct('EY-SURE'), getProduct('EY-MESA-COMEDOR')];
+      advisorMessage = 'En El Yeite trabajamos piezas con proporciones arquitectónicas estudiadas: Sillón Sure (78x82 cm), Sofá 3 Cuerpos (215x95 cm), Mesa de Comedor (200x100 cm) y Mesa Ratona (120x60 cm). También hacemos adaptaciones a medida.';
+      closingQuestion = '¿Cuáles son las dimensiones aproximadas del ambiente que querés equipar?';
+    }
+  } else if (isTelas) {
+    if (isSofa3c) {
+      selected = [getProduct('EY-SOFA-3C'), getProduct('EY-SURE')];
+      advisorMessage = 'Para el Sofá de 3 Cuerpos utilizamos lino pesado con tratamiento antimanchas y fundas 100% desmontables con cierres reforzados, lavables en ciclo suave de lavarropas. La mejor solución para chicos o mascotas.';
+      closingQuestion = '¿Querés que te enviemos la guía de tonos de lino antimanchas y cuidados de lavado?';
+    } else if (isSure) {
+      selected = [getProduct('EY-SURE'), getProduct('EY-SOFA-3C')];
+      advisorMessage = 'El Sillón Sure está tapizado en género de alto tránsito con tratamiento hidrorrepelente antimanchas: los líquidos derramados forman gotas en la superficie para limpiarse al instante con paño húmedo.';
+      closingQuestion = '¿Te gustaría ver la paleta de tonos neutros disponibles en géneros antimanchas?';
+    } else if (isSilla) {
+      selected = [getProduct('EY-SILLA-PANA'), getProduct('EY-MESA-COMEDOR')];
+      advisorMessage = 'Nuestras Sillas de Comedor están tapizadas en pana con tratamiento antimanchas de teflón invisible de alta densidad, resistentes al uso diario de comidas y muy fáciles de higienizar.';
+      closingQuestion = '¿Te gustaría combinar las sillas en pana con la Mesa de Petiribí Macizo?';
+    } else {
+      selected = [getProduct('EY-SOFA-3C'), getProduct('EY-SURE')];
+      advisorMessage = `Para el uso diario sin preocupaciones en ${brandConfig.brandName}, trabajamos géneros de alto tránsito con tratamiento antimanchas y fundas desmontables lavables. El Sofá de 3 Cuerpos y el Sillón Sure son nuestras piezas más resistentes.`;
+      closingQuestion = '¿Te gustaría que te enviemos el muestrario digital de géneros antimanchas y tonos disponibles?';
+    }
+  } else if (isEnvios) {
+    selected = [getProduct('EY-SURE'), getProduct('EY-SOFA-3C')];
+    advisorMessage = 'Realizamos envíos asegurados puerta a puerta a todo el país con embalaje reforzado de protección para maderas macizas y tapicería. El tiempo de taller artesanal es de 20 a 30 días hábiles, o entrega inmediata para stock.';
+    closingQuestion = '¿A qué localidad o provincia necesitarías el envío para cotizarte la logística exacta?';
+  } else if (isCuotas) {
+    selected = [getProduct('EY-SURE'), getProduct('EY-SOFA-3C')];
+    advisorMessage = 'Ofrecemos hasta 6 cuotas sin interés con todas las tarjetas bancarias y un 15% de descuento especial por transferencia bancaria directa. Todos nuestros muebles incluyen garantía de fabricación artesanal.';
+    closingQuestion = '¿Preferís financiar tu compra en cuotas sin interés o aprovechar el descuento por transferencia?';
+  } else if (isMesaComedor || detectedCategory === 'mesas') {
+    selected = [getProduct('EY-MESA-COMEDOR'), getProduct('EY-SILLA-PANA')];
+    advisorMessage = 'Para armar un comedor sólido y de líneas puras, la combinación de la Mesa de Comedor en Petiribí Macizo (200x100 cm) con las Sillas Tapizadas en Pana Antimanchas es la opción predilecta de nuestros clientes.';
+    closingQuestion = '¿Cuántos comensales solés recibir habitualmente para ajustar la medida o cantidad de sillas?';
+  } else if (isMesaRatona) {
+    selected = [getProduct('EY-MESA-RATONA'), getProduct('EY-SURE')];
+    advisorMessage = 'Nuestra Mesa Ratona Bloque en Petiribí Macizo de 120x60 cm tiene 40 cm de altura, la proporción ideal para articular el centro de tu living junto a sillones o sofás principales.';
+    closingQuestion = '¿Te gustaría saber las terminaciones al aceite mate o ver opciones de entrega inmediata?';
+  } else if (isSofa3c) {
+    selected = [getProduct('EY-SOFA-3C'), getProduct('EY-MESA-RATONA')];
+    advisorMessage = 'Para un living familiar de uso intenso, nuestro Sofá de 3 Cuerpos ofrece 95 cm de profundidad envolvente con fundas desmontables lavables en lino antimanchas, pensado para disfrutar sin miedo a las manchas.';
+    closingQuestion = '¿Buscás el sofá en tono lino crudo natural o preferís ver la paleta de colores para tu living?';
+  } else if (isPoltrona) {
+    selected = [getProduct('EY-POLTRONA-BOUCLE'), getProduct('EY-MESA-RATONA')];
+    advisorMessage = 'Para ese rincón de lectura o dormitorio, la Poltrona Individual Bouclé Crudo aporta calidez textil y ergonomía en solo 78 cm de ancho, con patas en madera noble a la vista.';
+    closingQuestion = '¿Querés confirmar las medidas exactas de tu rincón para validar que entre con fluidez?';
+  } else if (isSilla) {
+    selected = [getProduct('EY-SILLA-PANA'), getProduct('EY-MESA-COMEDOR')];
+    advisorMessage = 'Nuestras Sillas de Comedor Tapizadas en Pana combinan estructura reforzada en petiribí con espuma de alta densidad (28 kg) y tratamiento antimanchas para comidas diarias sin estrés.';
+    closingQuestion = '¿Buscás renovar las sillas de tu mesa actual o armar el conjunto completo?';
+  } else {
+    selected = matched.length >= 2 ? matched.slice(0, 2) : [getProduct('EY-SURE'), getProduct('EY-MESA-RATONA')];
+    advisorMessage = `Para resolver ese espacio con calidez artesanal en ${brandConfig.brandName}, la presencia del Sillón Sure en madera maciza junto a la Mesa Ratona Bloque en Petiribí te transforma el living con proporciones justas y fabricación a medida.`;
+    closingQuestion = '¿Lo buscás para entrega programada en tu domicilio o preferís chequear medidas exactas de tu espacio?';
+  }
 
   let visualAnalysis: string | null = null;
   if (hasImage) {
     if (visualClues && visualClues.trim().length > 0) {
       visualAnalysis = visualClues.trim();
-    } else if (detectedCategory === 'mesas' || query.toLowerCase().includes('comedor')) {
-      visualAnalysis =
-        'Observo un área de comedor con buena luz que pide la calidez de la Mesa en Petiribí macizo de 200cm junto a sillas tapizadas.';
-    } else if (query.toLowerCase().includes('familiar') || query.toLowerCase().includes('chicos') || query.toLowerCase().includes('mascotas')) {
-      visualAnalysis =
-        'Detecto un living familiar amplio de alto tránsito donde el Sofá de 3 Cuerpos con fundas lavables y género antimanchas resuelve confort y durabilidad.';
-    } else if (query.toLowerCase().includes('dormitorio') || query.toLowerCase().includes('estudio')) {
-      visualAnalysis =
-        'Veo un rincón compacto de menos de 1 metro que cobra protagonismo y textura con la Poltrona Bouclé Crudo.';
+    } else if (isMesaComedor || detectedCategory === 'mesas' || textAll.includes('comedor')) {
+      visualAnalysis = 'Observo un área de comedor con buena luz que pide la calidez de la Mesa en Petiribí macizo de 200cm junto a sillas tapizadas.';
+    } else if (isSofa3c || textAll.includes('familiar') || textAll.includes('chicos') || textAll.includes('mascotas')) {
+      visualAnalysis = 'Detecto un living familiar amplio de alto tránsito donde el Sofá de 3 Cuerpos con fundas lavables y género antimanchas resuelve confort y durabilidad.';
+    } else if (isPoltrona || textAll.includes('dormitorio') || textAll.includes('estudio')) {
+      visualAnalysis = 'Veo un rincón compacto de menos de 1 metro que cobra protagonismo y textura con la Poltrona Bouclé Crudo.';
     } else {
-      visualAnalysis =
-        'Veo en tu foto un ambiente con luz tenue y rincón disponible de ~1.30m que pide la presencia del Sillón Sure en madera maciza e iluminación cálida.';
+      visualAnalysis = 'Veo en tu foto un ambiente con luz tenue y rincón disponible de ~1.30m que pide la presencia del Sillón Sure en madera maciza e iluminación cálida.';
     }
-  }
-
-  let advisorMessage: string;
-  const qLower = query.toLowerCase();
-
-  if (isAntimanchasQuery) {
-    advisorMessage = `Para el uso diario sin preocupaciones en ${brandConfig.brandName}, trabajamos géneros de alto tránsito con tratamiento antimanchas y fundas desmontables lavables. El Sofá de 3 Cuerpos y el Sillón Sure son nuestras piezas más resistentes.`;
-  } else if (!isExactCategoryMatch && query.trim().length > 0) {
-    advisorMessage = `Te soy 100% honesto: en ${brandConfig.brandName} nos especializamos exclusivamente en muebles de autor y tapicería a medida en maderas nobles. Te seleccioné las piezas oficiales más afines a tu búsqueda para que veas sus especificaciones.`;
-  } else if (qLower.includes('comedor') || detectedCategory === 'mesas') {
-    advisorMessage = `Para armar un comedor sólido y de líneas puras, la combinación de la Mesa de Comedor en Petiribí Macizo (200x100 cm) con las Sillas Tapizadas en Pana Antimanchas es la opción predilecta de nuestros clientes.`;
-  } else if (qLower.includes('familiar') || qLower.includes('chicos') || qLower.includes('sofa') || qLower.includes('sofá')) {
-    advisorMessage = `Para un living familiar de uso intenso, nuestro Sofá de 3 Cuerpos ofrece 95 cm de profundidad envolvente con fundas desmontables lavables en lino antimanchas, pensado para disfrutar sin miedo a las manchas.`;
-  } else if (qLower.includes('boucle') || qLower.includes('bouclé') || qLower.includes('poltrona') || qLower.includes('dormitorio')) {
-    advisorMessage = `Para ese rincón de lectura o dormitorio, la Poltrona Individual Bouclé Crudo aporta calidez textil y ergonomía en solo 78 cm de ancho, con patas en madera noble a la vista.`;
-  } else {
-    advisorMessage = `Para resolver ese espacio con calidez artesanal, la dupla del Sillón Sure en madera maciza con la Mesa Ratona Bloque en Petiribí te transforma el living con proporciones justas y fabricación a medida.`;
   }
 
   const recommendedProducts: RecommendedProductOutput[] = selected.map((prod) => ({
@@ -530,10 +777,6 @@ export function generateDeterministicAdvisorResponse(
     imageUrl: prod.imageUrl,
     buyUrl: prod.buyUrl,
   }));
-
-  const closingQuestion = isAntimanchasQuery
-    ? '¿Te gustaría que te enviemos el muestrario digital de géneros antimanchas y tonos disponibles?'
-    : '¿Lo buscás para entrega programada en tu domicilio o preferís chequear medidas exactas de tu espacio?';
 
   return {
     visualAnalysis,

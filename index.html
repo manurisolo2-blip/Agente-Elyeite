@@ -143,7 +143,11 @@
             <label for="input-shipping" class="block text-[#5A534A] mb-1.5">Políticas de Envío, Cuotas y Cambios</label>
             <input id="input-shipping" type="text" class="w-full px-3 py-2.5 bg-[#F7F5F0] border border-[#DCD6CC] rounded-none focus:outline-none focus:border-[#181715]" />
           </div>
-          <div class="flex items-end">
+          <div class="sm:col-span-2">
+            <label for="input-gemini-api-key" class="block text-[#5A534A] mb-1.5">Gemini API Key (Opcional - Google AI Studio)</label>
+            <input id="input-gemini-api-key" type="password" placeholder="AIzaSy... (para llamadas directas si no hay backend)" class="w-full px-3 py-2.5 bg-[#F7F5F0] border border-[#DCD6CC] rounded-none font-mono text-xs focus:outline-none focus:border-[#181715]" />
+          </div>
+          <div class="sm:col-span-2 flex items-end">
             <button type="submit" class="w-full py-2.5 px-5 text-[10px] uppercase tracking-widest font-medium text-[#F7F5F0] bg-[#181715] hover:bg-[#2E2B27] rounded-none transition-colors cursor-pointer">
               Aplicar Cambios
             </button>
@@ -1019,84 +1023,268 @@
         });
       }
 
+      function getClientApiKey() {
+        const params = new URLSearchParams(window.location.search);
+        const paramKey = params.get("apiKey") || params.get("gemini_key") || params.get("key");
+        if (paramKey && paramKey.trim().length > 10) return paramKey.trim();
+        const inputEl = document.getElementById("input-gemini-api-key");
+        if (inputEl && inputEl.value && inputEl.value.trim().length > 10) return inputEl.value.trim();
+        const stored = localStorage.getItem("elyeite_gemini_api_key");
+        if (stored && stored.trim().length > 10) return stored.trim();
+        return "";
+      }
+
+      function formatClientGeminiHistory(rawTurns) {
+        if (!Array.isArray(rawTurns) || rawTurns.length === 0) return [];
+        const sanitized = [];
+        for (const turn of rawTurns) {
+          if (!turn || typeof turn !== "object") continue;
+          const text = typeof turn.text === "string" ? turn.text.trim() : (turn.text ? JSON.stringify(turn.text) : "");
+          if (!text) continue;
+          const role = turn.role === "model" ? "model" : "user";
+          if (sanitized.length === 0) {
+            if (role === "user") sanitized.push({ role: "user", parts: [{ text }] });
+            continue;
+          }
+          const lastRole = sanitized[sanitized.length - 1].role;
+          if (role !== lastRole) sanitized.push({ role, parts: [{ text }] });
+        }
+        while (sanitized.length > 0 && sanitized[sanitized.length - 1].role === "user") {
+          sanitized.pop();
+        }
+        return sanitized.slice(-8);
+      }
+
+      function buildClientAdvisorSystemInstruction(brandConfig) {
+        const catalogJson = JSON.stringify({
+          brandName: brandConfig.brandName,
+          tagline: brandConfig.tagline,
+          shippingAndReturns: brandConfig.shippingAndReturns,
+          products: brandConfig.products.map(p => ({
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            category: p.category,
+            features: p.features,
+            imageUrl: p.imageUrl,
+            buyUrl: p.buyUrl
+          }))
+        }, null, 2);
+
+        return `# ROL Y OBJETIVO\nActuás como el Asesor de Compras Multimodal de la mueblería artesanal ${brandConfig.brandName}. Analizás consultas y fotos y recomendás exclusivamente productos oficiales de ${brandConfig.brandName}.\n\n# CATÁLOGO\n${catalogJson}\n\n# REGLAS\n1. Recomendá únicamente productos de BRAND_CONFIG.products.\n2. Si hay foto, visualAnalysis tiene 1 línea descriptiva. Si NO hay foto, visualAnalysis debe ser estrictamente null.\n3. Respuesta persuasiva, directa en español rioplatense (máximo 3 líneas) y closingQuestion comercial corta.`;
+      }
+
+      const CLIENT_ADVISOR_SCHEMA = {
+        type: "OBJECT",
+        properties: {
+          visualAnalysis: { type: "STRING", nullable: true },
+          advisorMessage: { type: "STRING" },
+          recommendedProducts: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                id: { type: "STRING" },
+                matchReason: { type: "STRING" },
+                name: { type: "STRING" },
+                price: { type: "STRING" },
+                imageUrl: { type: "STRING" },
+                buyUrl: { type: "STRING" }
+              },
+              required: ["id", "matchReason", "name", "price", "imageUrl", "buyUrl"]
+            }
+          },
+          closingQuestion: { type: "STRING" }
+        },
+        required: ["visualAnalysis", "advisorMessage", "recommendedProducts", "closingQuestion"]
+      };
+
+      function sanitizeClientAdvisorResponse(rawJson, brandConfig, options) {
+        const fallback = generateLocalSmartFurnitureFallback(options.userQuery, options.visualClues, options.hasImage);
+        if (!rawJson || typeof rawJson !== "object") return fallback;
+
+        let visualAnalysis = null;
+        if (options.hasImage) {
+          visualAnalysis = typeof rawJson.visualAnalysis === "string" && rawJson.visualAnalysis.trim().length > 0 && rawJson.visualAnalysis.trim().toLowerCase() !== "null"
+            ? rawJson.visualAnalysis.trim()
+            : fallback.visualAnalysis;
+        }
+
+        const advisorMessage = typeof rawJson.advisorMessage === "string" && rawJson.advisorMessage.trim().length > 0
+          ? rawJson.advisorMessage.trim()
+          : fallback.advisorMessage;
+
+        const closingQuestion = typeof rawJson.closingQuestion === "string" && rawJson.closingQuestion.trim().length > 0
+          ? rawJson.closingQuestion.trim()
+          : fallback.closingQuestion;
+
+        const validProducts = [];
+        const seenIds = new Set();
+        const rawRecs = Array.isArray(rawJson.recommendedProducts) ? rawJson.recommendedProducts : [];
+
+        for (const rec of rawRecs) {
+          if (!rec || typeof rec !== "object") continue;
+          const rawId = typeof rec.id === "string" ? rec.id.trim().toUpperCase() : "";
+          const catalogItem = brandConfig.products.find(p => p.id.toUpperCase() === rawId) ||
+            brandConfig.products.find(p => typeof rec.name === "string" && p.name.toLowerCase().includes(rec.name.toLowerCase().trim()));
+
+          if (catalogItem && !seenIds.has(catalogItem.id)) {
+            seenIds.add(catalogItem.id);
+            validProducts.push({
+              id: catalogItem.id,
+              matchReason: typeof rec.matchReason === "string" && rec.matchReason.trim() ? rec.matchReason.trim() : catalogItem.features[0],
+              name: catalogItem.name,
+              price: catalogItem.price,
+              imageUrl: catalogItem.imageUrl,
+              buyUrl: catalogItem.buyUrl
+            });
+          }
+          if (validProducts.length >= 2) break;
+        }
+
+        if (validProducts.length === 0) {
+          validProducts.push(...fallback.recommendedProducts.slice(0, 2));
+        }
+
+        return {
+          visualAnalysis,
+          advisorMessage,
+          recommendedProducts: validProducts,
+          closingQuestion
+        };
+      }
+
       function generateLocalSmartFurnitureFallback(userQuery, clues, hasImage) {
         const text = ((userQuery || "") + " " + (clues || "")).toLowerCase();
+        const getProd = (id) => BRAND_CONFIG.products.find(p => p.id === id) || BRAND_CONFIG.products[0];
+
+        // Specific furniture detection
+        const isSure = text.includes("sure") || text.includes("1.30") || text.includes("1.50") || text.includes("rincon") || text.includes("rincón") || (text.includes("sillon") && !text.includes("sofa") && !text.includes("3 cuerpos"));
+        const isSofa3c = text.includes("sofa") || text.includes("sofá") || text.includes("3 cuerpos") || text.includes("tres cuerpos") || text.includes("familiar") || text.includes("chicos") || text.includes("mascotas");
+        const isMesaComedor = text.includes("mesa de comedor") || (text.includes("comedor") && !text.includes("silla")) || text.includes("8 comensales") || (text.includes("200") && text.includes("mesa"));
+        const isMesaRatona = text.includes("ratona") || text.includes("mesa baja") || text.includes("mesa centro") || text.includes("mesa de centro") || text.includes("bloque") || text.includes("120x60");
+        const isSilla = text.includes("silla") || text.includes("sillas") || text.includes("pana");
+        const isPoltrona = text.includes("poltrona") || text.includes("boucle") || text.includes("bouclé") || text.includes("dormitorio") || text.includes("estudio");
+
+        // Intent detection
+        const isMedidas = text.includes("medida") || text.includes("medidas") || text.includes("dimension") || text.includes("dimensiones") || text.includes("cuanto mide") || text.includes("cuánto mide") || text.includes("ancho") || text.includes("alto") || text.includes("profundidad") || text.includes("largo") || text.includes("cm") || text.includes("metros");
+        const isTelas = text.includes("antimancha") || text.includes("antimanchas") || text.includes("tela") || text.includes("telas") || text.includes("genero") || text.includes("género") || text.includes("tapizado") || text.includes("tapiceria") || text.includes("tapicería") || text.includes("limpiar") || text.includes("lavar") || text.includes("funda") || text.includes("fundas");
+        const isEnvios = text.includes("envio") || text.includes("envíos") || text.includes("envios") || text.includes("flete") || text.includes("fletes") || text.includes("entrega") || text.includes("despacho") || text.includes("interior") || text.includes("pais") || text.includes("país");
+        const isCuotas = text.includes("cuota") || text.includes("cuotas") || text.includes("pago") || text.includes("pagos") || text.includes("tarjeta") || text.includes("interes") || text.includes("interés") || text.includes("precio") || text.includes("financiacion") || text.includes("transferencia");
+
         let selectedProducts = [];
         let advisorMessage = "";
-        let visualAnalysis = null;
-        let closingQuestion = "¿Te gustaría que te enviemos muestras digitales de géneros antimanchas o chequear las medidas de tu ambiente?";
+        let closingQuestion = "¿Lo buscás para entrega programada en tu domicilio o preferís chequear medidas exactas de tu espacio?";
 
+        if (isMedidas && isTelas) {
+          if (isSure) {
+            selectedProducts = [getProd("EY-SURE"), getProd("EY-MESA-RATONA")];
+            advisorMessage = "El Sillón Sure mide 78 cm de ancho, 82 cm de profundidad y 74 cm de altura total (ideal para rincones de 1.30 a 1.50 m). Viene tapizado en género de alto tránsito con tratamiento antimanchas que repele líquidos y se limpia fácilmente con un paño húmedo.";
+            closingQuestion = "¿Querés que te preparemos la cotización con envío a tu localidad o preferís elegir el color del tapizado?";
+          } else if (isSofa3c) {
+            selectedProducts = [getProd("EY-SOFA-3C"), getProd("EY-MESA-RATONA")];
+            advisorMessage = "El Sofá de 3 Cuerpos tiene 215 cm de largo y 95 cm de profundidad con placas soft de alta densidad. Sus fundas son completamente desmontables y lavables en lino pesado con tratamiento antimanchas.";
+            closingQuestion = "¿Te gustaría verificar si el largo de 215 cm se adapta bien a la pared principal de tu living?";
+          } else {
+            selectedProducts = [getProd("EY-SURE"), getProd("EY-SOFA-3C")];
+            advisorMessage = "En El Yeite combinamos medidas ergonómicas con géneros antimanchas de alto tránsito: el Sillón Sure mide 78x82 cm para rincones compactos, y el Sofá 3 Cuerpos mide 215x95 cm con fundas desmontables lavables.";
+            closingQuestion = "¿Querés que te enviemos las medidas detalladas de plano y el muestrario de telas?";
+          }
+        } else if (isMedidas) {
+          if (isSure) {
+            selectedProducts = [getProd("EY-SURE"), getProd("EY-MESA-RATONA")];
+            advisorMessage = "El Sillón Sure tiene una proporción ergonómica de 78 cm de ancho, 82 cm de profundidad y 74 cm de alto (asiento a 44 cm). Está diseñado específicamente para lucirse en rincones de 1.30 a 1.50 metros sin obstaculizar el paso.";
+            closingQuestion = "¿Tenés medido el rincón donde pensás ubicarlo para verificar la circulación?";
+          } else if (isSofa3c) {
+            selectedProducts = [getProd("EY-SOFA-3C"), getProd("EY-MESA-RATONA")];
+            advisorMessage = "El Sofá de 3 Cuerpos mide 215 cm de ancho, 95 cm de profundidad total y 85 cm de alto, brindando un asiento amplio y envolvente con placas soft de 28 kg/m³.";
+            closingQuestion = "¿Buscás complementar el sofá con una mesa ratona o poltronas individuales?";
+          } else if (isMesaComedor) {
+            selectedProducts = [getProd("EY-MESA-COMEDOR"), getProd("EY-SILLA-PANA")];
+            advisorMessage = "La Mesa de Comedor en Petiribí Macizo mide 200 × 100 cm con una altura estándar de 76 cm. Su tapa maciza de 2 pulgadas alberga cómodamente a 8 comensales con gran estabilidad.";
+            closingQuestion = "¿Querés consultar por medidas especiales de mesa o por el juego completo con sillas tapizadas?";
+          } else if (isMesaRatona) {
+            selectedProducts = [getProd("EY-MESA-RATONA"), getProd("EY-SURE")];
+            advisorMessage = "La Mesa Ratona Bloque en Petiribí mide 120 × 60 cm y tiene 40 cm de altura, la cota óptima para integrarse frente a sofás o sillones sin obstaculizar la vista ni el paso.";
+            closingQuestion = "¿Te gustaría saber los acabados en cera mate y tiempos de entrega de la mesa ratona?";
+          } else if (isPoltrona) {
+            selectedProducts = [getProd("EY-POLTRONA-BOUCLE"), getProd("EY-MESA-RATONA")];
+            advisorMessage = "La Poltrona Individual Bouclé Crudo mide 78 cm de ancho, 80 cm de profundidad y 76 cm de altura total. Es una pieza sumamente confortable que requiere menos de 1 metro cuadrado libre.";
+            closingQuestion = "¿Querés confirmar las medidas de tu ambiente para asegurarnos de que encaje con holgura?";
+          } else if (isSilla) {
+            selectedProducts = [getProd("EY-SILLA-PANA"), getProd("EY-MESA-COMEDOR")];
+            advisorMessage = "La Silla de Comedor Tapizada mide 48 cm de ancho, 52 cm de profundidad y 84 cm de altura de respaldo (asiento ergonómico a 47 cm). Su estructura reforzada en petiribí soporta uso continuo.";
+            closingQuestion = "¿Cuántas sillas necesitás para tu mesa de comedor?";
+          } else {
+            selectedProducts = [getProd("EY-SURE"), getProd("EY-MESA-COMEDOR")];
+            advisorMessage = "En El Yeite trabajamos piezas con proporciones arquitectónicas estudiadas: Sillón Sure (78x82 cm), Sofá 3 Cuerpos (215x95 cm), Mesa de Comedor (200x100 cm) y Mesa Ratona (120x60 cm). También hacemos adaptaciones a medida.";
+            closingQuestion = "¿Cuáles son las dimensiones aproximadas del ambiente que querés equipar?";
+          }
+        } else if (isTelas) {
+          if (isSofa3c) {
+            selectedProducts = [getProd("EY-SOFA-3C"), getProd("EY-SURE")];
+            advisorMessage = "Para el Sofá de 3 Cuerpos utilizamos lino pesado con tratamiento antimanchas y fundas 100% desmontables con cierres reforzados, lavables en ciclo suave de lavarropas. La mejor solución para chicos o mascotas.";
+            closingQuestion = "¿Querés que te enviemos la guía de tonos de lino antimanchas y cuidados de lavado?";
+          } else if (isSure) {
+            selectedProducts = [getProd("EY-SURE"), getProd("EY-SOFA-3C")];
+            advisorMessage = "El Sillón Sure está tapizado en género de alto tránsito con tratamiento hidrorrepelente antimanchas: los líquidos derramados forman gotas en la superficie para limpiarse al instante con paño húmedo.";
+            closingQuestion = "¿Te gustaría ver la paleta de tonos neutros disponibles en géneros antimanchas?";
+          } else if (isSilla) {
+            selectedProducts = [getProd("EY-SILLA-PANA"), getProd("EY-MESA-COMEDOR")];
+            advisorMessage = "Nuestras Sillas de Comedor están tapizadas en pana con tratamiento antimanchas de teflón invisible de alta densidad, resistentes al uso diario de comidas y muy fáciles de higienizar.";
+            closingQuestion = "¿Te gustaría combinar las sillas en pana con la Mesa de Petiribí Macizo?";
+          } else {
+            selectedProducts = [getProd("EY-SOFA-3C"), getProd("EY-SURE")];
+            advisorMessage = "Para el uso diario sin preocupaciones en " + BRAND_CONFIG.brandName + ", confeccionamos tapicería de alto tránsito con géneros antimanchas y fundas desmontables lavables. El Sofá de 3 Cuerpos y el Sillón Sure son nuestras opciones más resistentes y confortables.";
+            closingQuestion = "¿Te gustaría que te enviemos el muestrario digital de géneros antimanchas y tonos disponibles?";
+          }
+        } else if (isEnvios) {
+          selectedProducts = [getProd("EY-SURE"), getProd("EY-SOFA-3C")];
+          advisorMessage = "Realizamos envíos asegurados puerta a puerta a todo el país con embalaje reforzado de protección para maderas macizas y tapicería. El tiempo de taller artesanal es de 20 a 30 días hábiles, o entrega inmediata para stock.";
+          closingQuestion = "¿A qué localidad o provincia necesitarías el envío para cotizarte la logística exacta?";
+        } else if (isCuotas) {
+          selectedProducts = [getProd("EY-SURE"), getProd("EY-SOFA-3C")];
+          advisorMessage = "Ofrecemos hasta 6 cuotas sin interés con todas las tarjetas bancarias y un 15% de descuento especial por transferencia bancaria directa. Todos nuestros muebles incluyen garantía de fabricación artesanal.";
+          closingQuestion = "¿Preferís financiar tu compra en cuotas sin interés o aprovechar el descuento por transferencia?";
+        } else if (isMesaComedor) {
+          selectedProducts = [getProd("EY-MESA-COMEDOR"), getProd("EY-SILLA-PANA")];
+          advisorMessage = "Para armar un comedor sólido y de líneas puras, la combinación de la Mesa de Comedor en Petiribí Macizo (200x100 cm) con las Sillas Tapizadas en Pana Antimanchas es la opción predilecta de nuestros clientes.";
+          closingQuestion = "¿Cuántos comensales solés recibir habitualmente para ajustar la medida o cantidad de sillas?";
+        } else if (isMesaRatona) {
+          selectedProducts = [getProd("EY-MESA-RATONA"), getProd("EY-SURE")];
+          advisorMessage = "Nuestra Mesa Ratona Bloque en Petiribí Macizo de 120x60 cm tiene 40 cm de altura, la proporción ideal para articular el centro de tu living junto a sillones o sofás principales.";
+          closingQuestion = "¿Te gustaría saber las terminaciones al aceite mate o ver opciones de entrega inmediata?";
+        } else if (isSofa3c) {
+          selectedProducts = [getProd("EY-SOFA-3C"), getProd("EY-MESA-RATONA")];
+          advisorMessage = "Para un living familiar de uso intenso, nuestro Sofá de 3 Cuerpos ofrece 95 cm de profundidad envolvente con fundas desmontables lavables en lino antimanchas, pensado para disfrutar sin miedo a las manchas.";
+          closingQuestion = "¿Buscás el sofá en tono lino crudo natural o preferís ver la paleta de colores para tu living?";
+        } else if (isPoltrona) {
+          selectedProducts = [getProd("EY-POLTRONA-BOUCLE"), getProd("EY-MESA-RATONA")];
+          advisorMessage = "Para ese rincón de lectura o dormitorio, la Poltrona Individual Bouclé Crudo aporta calidez textil y ergonomía en solo 78 cm de ancho, con patas en madera noble a la vista.";
+          closingQuestion = "¿Querés confirmar las medidas exactas de tu rincón para validar que entre con fluidez?";
+        } else if (isSilla) {
+          selectedProducts = [getProd("EY-SILLA-PANA"), getProd("EY-MESA-COMEDOR")];
+          advisorMessage = "Nuestras Sillas de Comedor Tapizadas en Pana combinan estructura reforzada en petiribí con espuma de alta densidad (28 kg) y tratamiento antimanchas para comidas diarias sin estrés.";
+          closingQuestion = "¿Buscás renovar las sillas de tu mesa actual o armar el conjunto completo?";
+        } else {
+          selectedProducts = [getProd("EY-SURE"), getProd("EY-MESA-RATONA")];
+          advisorMessage = "Para lo que estás buscando en " + BRAND_CONFIG.brandName + ", seleccioné estas piezas artesanales de nuestro catálogo oficial fabricadas en maderas nobles y tapicería a medida.";
+          closingQuestion = "¿Te gustaría evaluar medidas exactas o consultar por algún modelo específico de nuestro catálogo?";
+        }
+
+        let visualAnalysis = null;
         if (hasImage) {
           if (clues && clues.trim().length > 0) {
             visualAnalysis = clues.trim();
-          } else if (text.includes("comedor") || text.includes("mesa")) {
+          } else if (isMesaComedor || text.includes("comedor") || text.includes("mesa")) {
             visualAnalysis = "Identifico un área de comedor con buena luz que pide la calidez de la Mesa en Petiribí macizo de 200cm junto a sillas tapizadas.";
-          } else if (text.includes("familiar") || text.includes("chicos") || text.includes("mascotas")) {
+          } else if (isSofa3c || text.includes("familiar") || text.includes("chicos") || text.includes("mascotas")) {
             visualAnalysis = "Detecto un living familiar de alto tránsito donde el Sofá de 3 Cuerpos con fundas desmontables y tela antimanchas brinda confort y durabilidad.";
-          } else if (text.includes("dormitorio") || text.includes("estudio") || text.includes("boucle") || text.includes("bouclé")) {
+          } else if (isPoltrona || text.includes("dormitorio") || text.includes("estudio") || text.includes("boucle") || text.includes("bouclé")) {
             visualAnalysis = "Observo un rincón compacto de descanso que cobra protagonismo y textura con la Poltrona Bouclé Crudo.";
           } else {
             visualAnalysis = "Veo en tu foto un ambiente con luz tenue y rincón disponible de ~1.30m que pide la presencia del Sillón Sure en madera maciza.";
           }
-        }
-
-        const isAntimanchas = text.includes("antimancha") || text.includes("antimanchas") || text.includes("tela") || text.includes("telas") || text.includes("limpiar") || text.includes("lavar");
-        const isComedor = text.includes("comedor") || text.includes("mesa de comedor") || text.includes("silla") || text.includes("sillas") || text.includes("comensales");
-        const isMesaRatona = text.includes("ratona") || text.includes("mesa baja") || text.includes("mesa centro") || text.includes("bloque");
-        const isSofaFamiliar = text.includes("sofa") || text.includes("sofá") || text.includes("3 cuerpos") || text.includes("familiar") || text.includes("chicos") || text.includes("mascotas");
-        const isPoltrona = text.includes("poltrona") || text.includes("boucle") || text.includes("bouclé") || text.includes("dormitorio") || text.includes("estudio");
-        const isRincon = text.includes("sure") || text.includes("1.30") || text.includes("rincon") || text.includes("rincón") || text.includes("lectura");
-        const isMedidasEnvios = text.includes("medida") || text.includes("medidas") || text.includes("envio") || text.includes("envíos") || text.includes("cuota") || text.includes("cuotas");
-
-        if (isAntimanchas) {
-          selectedProducts = [
-            BRAND_CONFIG.products.find(p => p.id === "EY-SOFA-3C") || BRAND_CONFIG.products[1],
-            BRAND_CONFIG.products.find(p => p.id === "EY-SURE") || BRAND_CONFIG.products[0]
-          ];
-          advisorMessage = "Para el uso diario sin preocupaciones en " + BRAND_CONFIG.brandName + ", confeccionamos tapicería de alto tránsito con géneros antimanchas y fundas desmontables lavables. El Sofá de 3 Cuerpos y el Sillón Sure son nuestras opciones más resistentes y confortables.";
-          closingQuestion = "¿Querés que te mostremos los tonos disponibles en lino pesado y pana con tratamiento antimanchas?";
-        } else if (isComedor) {
-          selectedProducts = [
-            BRAND_CONFIG.products.find(p => p.id === "EY-MESA-COMEDOR") || BRAND_CONFIG.products[2],
-            BRAND_CONFIG.products.find(p => p.id === "EY-SILLA-PANA") || BRAND_CONFIG.products[4]
-          ];
-          advisorMessage = "Para armar un comedor sólido y de líneas puras, la combinación de la Mesa de Comedor en Petiribí Macizo (200x100 cm) con las Sillas Tapizadas en Pana Antimanchas es la opción predilecta de nuestros clientes.";
-          closingQuestion = "¿Cuántos comensales solés recibir habitualmente para ajustar la medida o cantidad de sillas?";
-        } else if (isSofaFamiliar) {
-          selectedProducts = [
-            BRAND_CONFIG.products.find(p => p.id === "EY-SOFA-3C") || BRAND_CONFIG.products[1],
-            BRAND_CONFIG.products.find(p => p.id === "EY-MESA-RATONA") || BRAND_CONFIG.products[3]
-          ];
-          advisorMessage = "Para un living familiar de uso intenso, nuestro Sofá de 3 Cuerpos ofrece 95 cm de profundidad con placas soft de alta densidad y fundas desmontables lavables en lino antimanchas, ideal junto a la Mesa Ratona Bloque en Petiribí.";
-          closingQuestion = "¿Buscás el sofá en tono lino crudo natural o preferís ver la paleta de colores para tu living?";
-        } else if (isPoltrona) {
-          selectedProducts = [
-            BRAND_CONFIG.products.find(p => p.id === "EY-POLTRONA-BOUCLE") || BRAND_CONFIG.products[5],
-            BRAND_CONFIG.products.find(p => p.id === "EY-MESA-RATONA") || BRAND_CONFIG.products[3]
-          ];
-          advisorMessage = "Para ese rincón de lectura o dormitorio compacto, la Poltrona Individual Bouclé Crudo aporta calidez textil y ergonomía en solo 78 cm de ancho, con base en madera noble a la vista.";
-          closingQuestion = "¿Querés confirmar las medidas exactas de tu rincón para validar que entre con fluidez?";
-        } else if (isMesaRatona) {
-          selectedProducts = [
-            BRAND_CONFIG.products.find(p => p.id === "EY-MESA-RATONA") || BRAND_CONFIG.products[3],
-            BRAND_CONFIG.products.find(p => p.id === "EY-SURE") || BRAND_CONFIG.products[0]
-          ];
-          advisorMessage = "Nuestra Mesa Ratona Bloque en Petiribí Macizo de 120x60 cm tiene 40 cm de altura, la proporción ideal para articular el centro de tu living junto a sillones o sofás.";
-          closingQuestion = "¿Te gustaría saber las terminaciones al aceite mate o ver opciones de entrega inmediata?";
-        } else if (isRincon || isMedidasEnvios) {
-          selectedProducts = [
-            BRAND_CONFIG.products.find(p => p.id === "EY-SURE") || BRAND_CONFIG.products[0],
-            BRAND_CONFIG.products.find(p => p.id === "EY-MESA-RATONA") || BRAND_CONFIG.products[3]
-          ];
-          advisorMessage = "Para optimizar un espacio de 1.30 a 1.50 metros sin sobrecargar el ambiente, el Sillón Sure en madera maciza con la Mesa Ratona Bloque arman un rincón estético, confortable y con envío a todo el país.";
-          closingQuestion = "¿Lo buscás para entrega programada en tu domicilio o querés consultar por cuotas sin interés?";
-        } else {
-          selectedProducts = [
-            BRAND_CONFIG.products[0],
-            BRAND_CONFIG.products[3] || BRAND_CONFIG.products[1]
-          ];
-          advisorMessage = "Para lo que estás buscando en " + BRAND_CONFIG.brandName + ", seleccioné estas piezas artesanales de nuestro catálogo oficial fabricadas en maderas nobles y tapicería a medida.";
-          closingQuestion = "¿Te gustaría evaluar medidas exactas o consultar por algún modelo específico de nuestro catálogo?";
         }
 
         return {
@@ -1150,16 +1338,19 @@
         renderConversationThreads();
         scrollThreadsToBottom();
 
-        try {
-          let base64Clean = "";
-          if (sentImageUri && sentImageUri.includes(";base64,")) {
-            base64Clean = sentImageUri.split(";base64,")[1];
-          }
+        let base64Clean = "";
+        if (sentImageUri && sentImageUri.includes(";base64,")) {
+          base64Clean = sentImageUri.split(";base64,")[1];
+        }
 
+        const clientApiKey = getClientApiKey();
+
+        try {
           const response = await fetch("/api/advisor/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              apiKey: clientApiKey || undefined,
               message: userTurn.text,
               imageBase64: base64Clean || undefined,
               imageMimeType: sentMimeType || undefined,
@@ -1169,6 +1360,10 @@
               brandConfig: BRAND_CONFIG
             })
           });
+
+          if (!response.ok) {
+            throw new Error(`Server returned HTTP ${response.status}`);
+          }
 
           const data = await response.json();
           if (!data || !data.structured) {
@@ -1184,8 +1379,61 @@
           conversationTurns.push(userTurn, advisorTurn);
           renderConversationThreads();
           scrollThreadsToBottom();
-        } catch (_err) {
-          const smartOutput = generateLocalSmartFurnitureFallback(userTurn.text, sentClues, hasImage);
+        } catch (fetchErr) {
+          // If serverless endpoint failed (e.g. pure static deployment) and client has an API key, call Gemini REST API directly
+          let directOutput = null;
+          if (clientApiKey) {
+            try {
+              const restUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + encodeURIComponent(clientApiKey);
+              const restSysInstruction = buildClientAdvisorSystemInstruction(BRAND_CONFIG);
+
+              const restParts = [];
+              if (hasImage && base64Clean) {
+                restParts.push({
+                  inlineData: {
+                    mimeType: sentMimeType || "image/jpeg",
+                    data: base64Clean
+                  }
+                });
+              }
+              const promptText = userTurn.text || "Analizá esta foto y recomendame qué muebles elegir de la colección.";
+              const fullPrompt = hasImage && sentClues && !base64Clean ? `${promptText}\n[Contexto visual: ${sentClues}]` : promptText;
+              restParts.push({ text: fullPrompt });
+
+              const restHistory = formatClientGeminiHistory(historyPayload);
+              const restContents = [...restHistory, { role: "user", parts: restParts }];
+
+              const restRes = await fetch(restUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  systemInstruction: { parts: [{ text: restSysInstruction }] },
+                  contents: restContents,
+                  generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: CLIENT_ADVISOR_SCHEMA
+                  }
+                })
+              });
+
+              if (restRes.ok) {
+                const restData = await restRes.json();
+                const rawJsonText = restData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (rawJsonText) {
+                  const parsed = JSON.parse(rawJsonText);
+                  directOutput = sanitizeClientAdvisorResponse(parsed, BRAND_CONFIG, {
+                    hasImage,
+                    userQuery: promptText,
+                    visualClues: sentClues
+                  });
+                }
+              }
+            } catch (directErr) {
+              console.warn("Direct Gemini REST call failed, falling back to smart local engine:", directErr);
+            }
+          }
+
+          const smartOutput = directOutput || generateLocalSmartFurnitureFallback(userTurn.text, sentClues, hasImage);
           const fallbackAdvisorTurn = {
             role: "advisor",
             output: smartOutput
@@ -1334,8 +1582,25 @@
           const customAccent = document.getElementById("input-accent-color").value.trim();
           BRAND_CONFIG.theme.accentColor = customAccent || preset.theme.accentColor;
           BRAND_CONFIG.shippingAndReturns = document.getElementById("input-shipping").value.trim() || BRAND_CONFIG.shippingAndReturns;
+
+          const keyInput = document.getElementById("input-gemini-api-key");
+          if (keyInput) {
+            const val = keyInput.value.trim();
+            if (val) {
+              localStorage.setItem("elyeite_gemini_api_key", val);
+            } else {
+              localStorage.removeItem("elyeite_gemini_api_key");
+            }
+          }
+
           applyBrandConfigToDOM();
         });
+
+        const savedApiKey = localStorage.getItem("elyeite_gemini_api_key");
+        if (savedApiKey) {
+          const keyInput = document.getElementById("input-gemini-api-key");
+          if (keyInput) keyInput.value = savedApiKey;
+        }
 
         const fileInput = document.getElementById("bio-file-input");
         document.getElementById("bio-attach-photo-btn").addEventListener("click", () => fileInput.click());

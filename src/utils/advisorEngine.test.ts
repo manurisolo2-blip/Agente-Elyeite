@@ -7,6 +7,7 @@ import {
   matchCatalogProducts,
   sanitizeAdvisorResponse,
   generateDeterministicAdvisorResponse,
+  formatGeminiHistory,
 } from './advisorEngine.ts';
 
 test('BRAND_CONFIG contains exactly 6 furniture products with real photography URLs, theme, quickPrompts, and shippingAndReturns', () => {
@@ -112,4 +113,60 @@ test('generateDeterministicAdvisorResponse explains honestly when product is not
   assert.ok(outOfCatalog.advisorMessage.includes('nos especializamos exclusivamente en muebles'));
   assert.ok(outOfCatalog.recommendedProducts.length >= 1);
   assert.ok(outOfCatalog.recommendedProducts.length <= 2);
+});
+
+test('generateDeterministicAdvisorResponse answers specifically for measures, fabrics, shipping and specific items', () => {
+  const sureQuery = generateDeterministicAdvisorResponse(
+    '¿Cuáles son las medidas y telas del Sillón Sure?',
+    DEFAULT_BRAND_CONFIG,
+    false
+  );
+  assert.equal(sureQuery.visualAnalysis, null);
+  assert.ok(sureQuery.advisorMessage.includes('78 cm de ancho'));
+  assert.ok(sureQuery.advisorMessage.includes('antimanchas'));
+  assert.equal(sureQuery.recommendedProducts[0].id, 'EY-SURE');
+
+  const enviosQuery = generateDeterministicAdvisorResponse(
+    '¿Cómo son los envíos al interior y las cuotas?',
+    DEFAULT_BRAND_CONFIG,
+    false
+  );
+  assert.ok(enviosQuery.advisorMessage.includes('envíos') || enviosQuery.advisorMessage.includes('puerta a puerta'));
+  assert.ok(enviosQuery.recommendedProducts.length >= 1);
+});
+
+test('formatGeminiHistory enforces role alternation, discards leading model turn, and ends on model', () => {
+  // Case 1: Starts with model turn -> model turn is dropped
+  const history1 = [
+    { role: 'model', text: 'Hola, soy el asesor' },
+    { role: 'user', text: 'Hola' },
+    { role: 'model', text: '¿En qué te ayudo?' },
+  ];
+  const formatted1 = formatGeminiHistory(history1);
+  assert.equal(formatted1.length, 2);
+  assert.equal(formatted1[0].role, 'user');
+  assert.equal(formatted1[1].role, 'model');
+
+  // Case 2: History ending in user -> trailing user dropped so appending current user won't duplicate roles
+  const history2 = [
+    { role: 'user', text: '1' },
+    { role: 'model', text: '2' },
+    { role: 'user', text: '3' },
+  ];
+  const formatted2 = formatGeminiHistory(history2);
+  assert.equal(formatted2.length, 2);
+  assert.equal(formatted2[0].role, 'user');
+  assert.equal(formatted2[1].role, 'model');
+
+  // Case 3: Consecutive same-role turns -> deduplicated
+  const history3 = [
+    { role: 'user', text: 'u1' },
+    { role: 'user', text: 'u2' },
+    { role: 'model', text: 'm1' },
+    { role: 'model', text: 'm2' },
+  ];
+  const formatted3 = formatGeminiHistory(history3);
+  assert.equal(formatted3.length, 2);
+  assert.equal(formatted3[0].role, 'user');
+  assert.equal(formatted3[1].role, 'model');
 });

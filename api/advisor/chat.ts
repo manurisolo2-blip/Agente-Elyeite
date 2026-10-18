@@ -4,17 +4,14 @@ import {
   buildAdvisorSystemInstruction,
   sanitizeAdvisorResponse,
   generateDeterministicAdvisorResponse,
+  formatGeminiHistory,
 } from '../../src/utils/advisorEngine.ts';
-import type { BrandConfig } from '../../src/utils/advisorEngine.ts';
+import type { BrandConfig, ChatHistoryTurn } from '../../src/utils/advisorEngine.ts';
 
 const OFFICIAL_MODEL = 'gemini-2.5-flash';
 
-interface ChatHistoryTurn {
-  role: 'user' | 'model';
-  text: string;
-}
-
 interface AdvisorRequestBody {
+  apiKey?: string;
   message?: string;
   imageBase64?: string;
   imageMimeType?: string;
@@ -120,26 +117,16 @@ export default async function handler(req: any, res: any) {
 
   const systemInstruction = buildAdvisorSystemInstruction(activeBrandConfig);
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const resolvedApiKey = (body.apiKey || '').trim() || (process.env.GEMINI_API_KEY || '').trim();
   const hasValidApiKey =
-    Boolean(apiKey) && apiKey !== 'MY_GEMINI_API_KEY' && apiKey!.trim().length > 10;
+    Boolean(resolvedApiKey) && resolvedApiKey !== 'MY_GEMINI_API_KEY' && resolvedApiKey.length > 10;
 
   if (hasValidApiKey) {
     const ai = new GoogleGenAI({
-      apiKey: apiKey!,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        },
-      },
+      apiKey: resolvedApiKey,
     });
 
-    const historyContents = Array.isArray(body.history)
-      ? body.history.slice(-8).map((turn) => ({
-          role: turn.role === 'model' ? 'model' : 'user',
-          parts: [{ text: turn.text }],
-        }))
-      : [];
+    const historyContents = formatGeminiHistory(body.history);
 
     const currentParts: Array<
       | { text: string }
@@ -233,14 +220,15 @@ export default async function handler(req: any, res: any) {
         res.status(200).json({
           structured,
           meta: {
+            source: 'gemini-live',
             modelUsed: OFFICIAL_MODEL,
             latencyMs: Date.now() - startTime,
           },
         });
         return;
       }
-    } catch (_err) {
-      // Fallback if API key is rate-limited, unreachable, or timed out
+    } catch (err) {
+      console.error("Error en Gemini API:", err);
     }
   }
 
@@ -254,8 +242,10 @@ export default async function handler(req: any, res: any) {
   res.status(200).json({
     structured,
     meta: {
+      source: 'local-fallback',
       modelUsed: OFFICIAL_MODEL,
       latencyMs: Math.max(120, Date.now() - startTime),
+      fallbackReason: hasValidApiKey ? 'gemini_api_error_or_timeout' : 'no_api_key_configured',
     },
   });
 }
