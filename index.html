@@ -1,0 +1,1421 @@
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EL YEITE · Taller de Muebles | Asesor de Compras Multimodal</title>
+    <meta name="description" content="Asesor de compras multimodal 24/7 con diagnóstico visual de espacios, piel, indumentaria y repuestos técnicos, conectado con fidelidad absoluta al catálogo oficial BRAND_CONFIG." />
+    <meta property="og:title" content="EL YEITE · Taller de Muebles | Asesor de Compras Multimodal" />
+    <meta property="og:description" content="Asesor de compras multimodal 24/7 con diagnóstico visual de espacios, piel, indumentaria y repuestos técnicos, conectado con fidelidad absoluta al catálogo oficial BRAND_CONFIG." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/index.css" />
+    <style>
+      :root {
+        --font-display: "Instrument Serif", Georgia, serif;
+        --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+        --bg-primary: #F7F5F0;
+        --bg-secondary: #EFECE6;
+        --text-primary: #181715;
+        --accent-color: #8C5835;
+        --hairline: #DCD6CC;
+      }
+      body {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: var(--font-sans);
+      }
+      .font-editorial {
+        font-family: var(--font-display) !important;
+      }
+      .font-mono-num {
+        font-family: "JetBrains Mono", monospace;
+        font-variant-numeric: tabular-nums;
+      }
+      .hairline-border {
+        border-color: var(--hairline);
+      }
+      .accent-bg {
+        background-color: var(--accent-color) !important;
+      }
+      .accent-text {
+        color: var(--accent-color) !important;
+      }
+      @keyframes editorialPulse {
+        0%, 100% { opacity: 0.35; }
+        50% { opacity: 1; }
+      }
+      .editorial-loading-bar {
+        animation: editorialPulse 1.4s ease-in-out infinite;
+      }
+
+      /* Dynamic theme & atmospheric propagation across components */
+      [class*="border-[#DCD6CC]"],
+      .border-hairline {
+        border-color: var(--hairline) !important;
+      }
+      [class*="bg-[#F7F5F0]"] {
+        background-color: var(--bg-primary) !important;
+      }
+      [class*="bg-[#EFECE6]"],
+      [class*="bg-[#FAF8F5]"] {
+        background-color: var(--bg-secondary) !important;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex flex-col antialiased selection:bg-[#181715] selection:text-[#F7F5F0]">
+    <!-- TOP BAR CONTRACT: 3 ZONES (Single Wordmark | Navigation Links | 1 Primary Action) -->
+    <header class="sticky top-0 z-40 flex items-center justify-between gap-8 px-5 sm:px-8 py-4 bg-[#F7F5F0]/95 backdrop-blur-xs border-b border-[#DCD6CC]">
+      <a href="#top" id="header-brand-link" class="font-editorial text-2xl sm:text-[26px] font-semibold tracking-tight text-[#181715] whitespace-nowrap shrink-0">
+        EL YEITE
+      </a>
+
+      <nav aria-label="Navegación de experiencia" class="hidden md:flex items-center gap-8 text-xs font-medium text-[#5A534A]">
+        <button type="button" id="nav-btn-bio" class="hover:text-[#181715] transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5 border-b border-[#181715] text-[#181715]">
+          Asesoría Editorial
+        </button>
+        <button type="button" id="nav-btn-widget" class="hover:text-[#181715] transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5">
+          Colección &amp; Tienda
+        </button>
+        <button type="button" id="nav-btn-demo-config" class="hover:text-[#181715] transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5">
+          Personalizar Marca
+        </button>
+      </nav>
+
+      <div class="flex items-center shrink-0">
+        <button
+          type="button"
+          id="mode-toggle-btn"
+          class="px-4 py-2.5 text-[10px] font-medium uppercase tracking-widest text-[#F7F5F0] bg-[#181715] hover:bg-[#2E2B27] rounded-none transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+        >
+          Ver Tienda &amp; Burbuja →
+        </button>
+      </div>
+    </header>
+
+    <!-- SHIPPING & ATELIER COURTESY STRIP -->
+    <div class="bg-[#EFECE6] border-b border-[#DCD6CC] px-5 py-2 text-center">
+      <p id="shipping-returns-bar" class="text-[11px] text-[#4A443C] tracking-wide"></p>
+    </div>
+
+    <!-- DEMO BRAND CUSTOMIZATION PANEL (Accessible via ?demo=true or "Personalizar Marca") -->
+    <section id="demo-config-panel" class="hidden bg-[#FAF8F5] border-b border-[#DCD6CC] px-5 sm:px-8 py-6">
+      <div class="max-w-[1440px] mx-auto space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#DCD6CC] pb-3">
+          <div>
+            <h2 class="font-editorial text-2xl font-medium text-[#181715]">
+              Configuración de Identidad de Marca
+            </h2>
+            <p class="text-xs text-[#5A534A]">
+              Actualizá en vivo el nombre, bajada editorial, acento cromático y políticas comerciales.
+            </p>
+          </div>
+          <button type="button" id="close-demo-panel-btn" class="px-4 py-2 text-[10px] uppercase tracking-widest font-medium text-[#181715] bg-transparent border border-[#DCD6CC] hover:border-[#181715] rounded-none cursor-pointer">
+            Cerrar
+          </button>
+        </div>
+
+        <form id="brand-config-form" class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
+          <div>
+            <label for="input-style-preset" class="block text-[#5A534A] mb-1.5">Preset de Estilo &amp; Tipografía</label>
+            <select id="input-style-preset" class="w-full px-3 py-2.5 bg-[#F7F5F0] border border-[#DCD6CC] rounded-none focus:outline-none focus:border-[#181715] cursor-pointer">
+              <option value="atelier">Atelier &amp; Autor</option>
+              <option value="botanical">Botánica &amp; Clínica</option>
+              <option value="technical">Técnico &amp; Urbano</option>
+            </select>
+          </div>
+          <div>
+            <label for="input-brand-name" class="block text-[#5A534A] mb-1.5">Nombre de la Marca</label>
+            <input id="input-brand-name" type="text" class="w-full px-3 py-2.5 bg-[#F7F5F0] border border-[#DCD6CC] rounded-none focus:outline-none focus:border-[#181715]" />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="input-brand-tagline" class="block text-[#5A534A] mb-1.5">Bajada Editorial</label>
+            <input id="input-brand-tagline" type="text" class="w-full px-3 py-2.5 bg-[#F7F5F0] border border-[#DCD6CC] rounded-none focus:outline-none focus:border-[#181715]" />
+          </div>
+          <div>
+            <label for="input-accent-color" class="block text-[#5A534A] mb-1.5">Tono Acento (Hex)</label>
+            <input id="input-accent-color" type="text" class="w-full px-3 py-2.5 bg-[#F7F5F0] border border-[#DCD6CC] rounded-none font-mono-num focus:outline-none focus:border-[#181715]" />
+          </div>
+          <div class="sm:col-span-2">
+            <label for="input-shipping" class="block text-[#5A534A] mb-1.5">Políticas de Envío, Cuotas y Cambios</label>
+            <input id="input-shipping" type="text" class="w-full px-3 py-2.5 bg-[#F7F5F0] border border-[#DCD6CC] rounded-none focus:outline-none focus:border-[#181715]" />
+          </div>
+          <div class="flex items-end">
+            <button type="submit" class="w-full py-2.5 px-5 text-[10px] uppercase tracking-widest font-medium text-[#F7F5F0] bg-[#181715] hover:bg-[#2E2B27] rounded-none transition-colors cursor-pointer">
+              Aplicar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main id="top" class="flex-1 w-full flex flex-col">
+      <!-- =================================================================== -->
+      <!-- VIEW 1: VISTA LINK EN BIO (ARCHITECTURAL SWISS HAIRLINE SPLIT GRID) -->
+      <!-- =================================================================== -->
+      <div id="view-link-in-bio" class="flex-1 w-full max-w-[1440px] mx-auto border-x border-[#DCD6CC]">
+        <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-105px)] items-stretch">
+          <!-- LEFT PANEL (5 columns): Editorial Brand Cover & Visual Consultation Cases -->
+          <aside class="lg:col-span-5 border-b lg:border-b-0 lg:border-r border-[#DCD6CC] flex flex-col justify-between bg-[#F7F5F0]">
+            <div>
+              <!-- Brand Editorial Cover -->
+              <div class="p-6 sm:p-8 border-b border-[#DCD6CC] space-y-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-[#5A534A]">
+                    <span class="whitespace-nowrap">Atelier Oficial</span>
+                    <span aria-hidden="true">·</span>
+                    <span class="whitespace-nowrap">Buenos Aires</span>
+                    <span aria-hidden="true">·</span>
+                    <span class="whitespace-nowrap">Atención 24/7</span>
+                  </div>
+                  <img id="bio-logo" src="" alt="Monograma Oficial" referrerpolicy="no-referrer" class="w-8 h-8 object-cover border border-[#DCD6CC] shrink-0" />
+                </div>
+
+                <div class="space-y-2.5">
+                  <h1 id="bio-brand-title" class="font-editorial text-4xl sm:text-5xl font-normal tracking-tight text-[#181715] leading-[1.06] text-balance"></h1>
+                  <p id="bio-brand-tagline" class="text-sm text-[#4A443C] leading-relaxed max-w-md"></p>
+                </div>
+
+                <div class="pt-1 flex items-center justify-between gap-4 text-xs text-[#5A534A]">
+                  <span>Diagnóstico de interiores, botánica dérmica, sastrería y espresso</span>
+                  <button type="button" id="bio-open-demo-btn" class="text-xs accent-text underline underline-offset-4 hover:text-[#181715] whitespace-nowrap shrink-0 cursor-pointer">
+                    Editar marca
+                  </button>
+                </div>
+              </div>
+
+              <!-- Real Photo Consultation Presets (Exposed Hairline Grid) -->
+              <div class="border-b border-[#DCD6CC]">
+                <div class="px-6 sm:px-8 py-3.5 border-b border-[#DCD6CC] flex items-center justify-between gap-2">
+                  <h2 class="font-editorial text-xl font-medium text-[#181715]">
+                    Casos de Diagnóstico Visual
+                  </h2>
+                  <span class="text-xs text-[#6B6358] whitespace-nowrap">Probá con 1 clic</span>
+                </div>
+                <div id="diagnostic-presets-grid" class="grid grid-cols-2 gap-px bg-[#DCD6CC]"></div>
+              </div>
+            </div>
+
+            <!-- Suggested Inquiries Bar -->
+            <div class="p-6 sm:p-8 space-y-2.5 bg-[#EFECE6]/50">
+              <p class="text-xs text-[#5A534A]">Consultas frecuentes en salón:</p>
+              <div id="bio-quick-prompts" class="flex flex-wrap items-center gap-2"></div>
+            </div>
+          </aside>
+
+          <!-- RIGHT PANEL (7 columns): Chronological Conversation Stream + Fixed Base Composer -->
+          <section class="lg:col-span-7 flex flex-col bg-[#F7F5F0]">
+            <!-- Top Editorial Header of Consultation Thread -->
+            <div class="px-6 sm:px-8 py-3.5 border-b border-[#DCD6CC] flex items-center justify-between bg-[#F7F5F0]">
+              <div class="flex items-center gap-2 text-xs text-[#5A534A]">
+                <span class="font-medium text-[#181715]">Mesa de Asesoramiento</span>
+                <span aria-hidden="true">·</span>
+                <span>Curaduría personalizada por fotografía o consulta</span>
+              </div>
+              <span class="font-mono-num text-[11px] text-[#6B6358] whitespace-nowrap">COLECCIÓN OFICIAL</span>
+            </div>
+
+            <!-- Chronological Conversation Feed (Top-to-Bottom) -->
+            <div
+              id="bio-chat-thread"
+              aria-label="Conversación con el Asesor"
+              class="flex-1 px-6 sm:px-8 py-6 space-y-6 overflow-y-auto max-h-[68vh]"
+            ></div>
+
+            <!-- Anchored Base Composer -->
+            <div class="sticky bottom-0 z-20 bg-[#F7F5F0] border-t border-[#DCD6CC] p-5 sm:px-10 sm:py-6">
+              <form id="bio-chat-form" class="space-y-4">
+                <!-- Instant Photo Preview before sending -->
+                <div id="bio-image-preview-box" class="hidden items-center justify-between gap-4 bg-[#EFECE6] border border-[#DCD6CC] p-3">
+                  <div class="flex items-center gap-3.5">
+                    <img id="bio-image-preview-img" src="" alt="Previsualización de fotografía" referrerpolicy="no-referrer" class="w-16 h-12 object-cover border border-[#DCD6CC]" />
+                    <div class="space-y-0.5">
+                      <p id="bio-image-preview-label" class="text-xs font-medium text-[#181715]">Fotografía adjunta para evaluación</p>
+                      <p class="text-[11px] text-[#5A534A]">Lista para analizar junto con tu consulta</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    id="bio-remove-image-btn"
+                    aria-label="Quitar fotografía adjunta"
+                    class="p-2 text-[#5A534A] hover:text-[#181715] transition-colors cursor-pointer"
+                  >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div class="border border-[#181715] bg-white">
+                  <label for="bio-chat-input" class="sr-only">Escribí tu consulta para el asesor</label>
+                  <textarea
+                    id="bio-chat-input"
+                    rows="2"
+                    placeholder="Describí tu espacio, tipo de piel, talle que buscás o adjuntá una fotografía..."
+                    class="w-full p-4 text-sm text-[#181715] placeholder:text-[#8C8377] bg-transparent resize-none focus:outline-none"
+                  ></textarea>
+
+                  <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-[#DCD6CC] bg-[#FAF8F5]">
+                    <div class="flex items-center gap-3">
+                      <input id="bio-file-input" type="file" accept="image/*" class="hidden" />
+                      <button
+                        type="button"
+                        id="bio-attach-photo-btn"
+                        class="inline-flex items-center gap-2 px-3.5 py-2 text-[11px] uppercase tracking-widest font-medium text-[#181715] bg-white hover:bg-[#EFECE6] border border-[#DCD6CC] rounded-none transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                      >
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25">
+                          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                          <circle cx="12" cy="13" r="4" />
+                        </svg>
+                        <span>Subir Fotografía</span>
+                      </button>
+                    </div>
+
+                    <button
+                      type="submit"
+                      id="bio-submit-btn"
+                      class="inline-flex items-center gap-2 py-3 px-6 text-[10px] font-medium uppercase tracking-widest text-[#F7F5F0] bg-[#181715] hover:bg-[#2E2B27] rounded-none transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    >
+                      <span>Enviar Consulta →</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 2: MODO TIENDA EDITORIAL + BURBUJA FLOTANTE                    -->
+      <!-- =================================================================== -->
+      <div id="view-store-widget" class="hidden flex-1 w-full">
+        <div class="max-w-[1440px] mx-auto border-x border-[#DCD6CC] pb-32">
+          <!-- Storefront Editorial Header -->
+          <div class="px-6 sm:px-12 py-10 border-b border-[#DCD6CC] flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div class="space-y-3 max-w-2xl">
+              <div class="flex items-center gap-2 text-xs text-[#5A534A]">
+                <span>Colección Permanente</span>
+                <span aria-hidden="true">·</span>
+                <span>15 Piezas de Autor</span>
+              </div>
+              <h2 id="store-hero-title" class="font-editorial text-4xl sm:text-5xl font-normal text-[#181715] text-balance">
+                Objetos de Arquitectura Interior, Botánica Dérmica &amp; Sastrería
+              </h2>
+            </div>
+
+            <!-- Interactive Category Filter Tabs -->
+            <div id="store-category-filters" class="flex flex-wrap items-center border border-[#DCD6CC] bg-[#EFECE6]">
+              <button type="button" data-cat="all" class="store-cat-btn px-4 py-2.5 text-[11px] uppercase tracking-widest font-medium bg-[#181715] text-[#F7F5F0] rounded-none cursor-pointer whitespace-nowrap shrink-0">Todos (15)</button>
+              <button type="button" data-cat="espacio" class="store-cat-btn px-4 py-2.5 text-[11px] uppercase tracking-widest font-medium text-[#5A534A] hover:text-[#181715] rounded-none cursor-pointer whitespace-nowrap shrink-0">Interiores (5)</button>
+              <button type="button" data-cat="piel" class="store-cat-btn px-4 py-2.5 text-[11px] uppercase tracking-widest font-medium text-[#5A534A] hover:text-[#181715] rounded-none cursor-pointer whitespace-nowrap shrink-0">Piel (4)</button>
+              <button type="button" data-cat="prenda" class="store-cat-btn px-4 py-2.5 text-[11px] uppercase tracking-widest font-medium text-[#5A534A] hover:text-[#181715] rounded-none cursor-pointer whitespace-nowrap shrink-0">Sastrería (4)</button>
+              <button type="button" data-cat="repuesto" class="store-cat-btn px-4 py-2.5 text-[11px] uppercase tracking-widest font-medium text-[#5A534A] hover:text-[#181715] rounded-none cursor-pointer whitespace-nowrap shrink-0">Espresso (2)</button>
+            </div>
+          </div>
+
+          <!-- 15 Products Exposed Hairline Lookbook Grid -->
+          <div id="store-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[#DCD6CC] border-b border-[#DCD6CC]"></div>
+        </div>
+
+        <!-- FLOATING ARCHITECTURAL ADVISOR DRAWER OVER STORE -->
+        <div class="fixed bottom-5 right-5 z-50 flex flex-col items-end">
+          <div
+            id="floating-widget-window"
+            class="w-[92vw] sm:w-[440px] max-h-[78vh] bg-[#F7F5F0] border border-[#181715] rounded-none flex flex-col overflow-hidden mb-3"
+          >
+            <!-- Widget Header -->
+            <div class="bg-[#181715] text-[#F7F5F0] px-5 py-3.5 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <img id="widget-logo" src="" alt="Monograma" referrerpolicy="no-referrer" class="w-6 h-6 object-cover border border-[#3B3734]" />
+                <div>
+                  <h3 id="widget-brand-name" class="font-editorial text-lg font-medium leading-none">EL YEITE · Asesor</h3>
+                  <p class="text-[10px] text-[#B8B0A2] uppercase tracking-widest mt-1">Diagnóstico Visual en Vivo</p>
+                </div>
+              </div>
+              <button type="button" id="minimize-widget-btn" aria-label="Minimizar ventana de asesoría" class="text-[10px] uppercase tracking-widest text-[#D5CEC2] hover:text-white px-2 py-1 cursor-pointer">
+                Minimizar —
+              </button>
+            </div>
+
+            <!-- Widget Quick Prompts -->
+            <div id="widget-quick-prompts" class="px-4 py-2.5 bg-[#EFECE6] border-b border-[#DCD6CC] flex items-center gap-2 overflow-x-auto"></div>
+
+            <!-- Widget Scrollable Thread -->
+            <div id="widget-chat-thread" class="flex-1 p-4 space-y-5 overflow-y-auto max-h-[44vh]"></div>
+
+            <!-- Widget Composer -->
+            <form id="widget-chat-form" class="bg-white border-t border-[#DCD6CC] p-3.5 space-y-2.5">
+              <div id="widget-image-preview-box" class="hidden items-center justify-between gap-2 bg-[#F7F5F0] border border-[#DCD6CC] p-2">
+                <div class="flex items-center gap-2.5">
+                  <img id="widget-image-preview-img" src="" alt="Previsualización" referrerpolicy="no-referrer" class="w-11 h-8 object-cover border border-[#DCD6CC]" />
+                  <span class="text-xs text-[#181715]">Fotografía lista</span>
+                </div>
+                <button type="button" id="widget-remove-image-btn" aria-label="Quitar foto" class="p-1 text-[#5A534A] hover:text-[#181715] cursor-pointer">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  id="widget-attach-photo-btn"
+                  aria-label="Subir fotografía en el asesor flotante"
+                  class="p-2.5 text-[#181715] bg-[#F7F5F0] hover:bg-[#EFECE6] border border-[#DCD6CC] rounded-none shrink-0 cursor-pointer"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                </button>
+                <label for="widget-chat-input" class="sr-only">Consulta en asesor flotante</label>
+                <input
+                  id="widget-chat-input"
+                  type="text"
+                  placeholder="Consultá por medidas, talles o subí una foto..."
+                  class="flex-1 text-xs px-3 py-2.5 bg-[#F7F5F0] border border-[#DCD6CC] rounded-none focus:outline-none focus:border-[#181715]"
+                />
+                <button
+                  type="submit"
+                  class="px-4 py-2.5 text-[10px] font-medium uppercase tracking-widest text-[#F7F5F0] bg-[#181715] rounded-none shrink-0 cursor-pointer"
+                >
+                  Enviar
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Floating Trigger Button -->
+          <button
+            type="button"
+            id="floating-bubble-trigger"
+            class="inline-flex items-center gap-3 px-5 py-3.5 text-[11px] font-medium uppercase tracking-widest text-[#F7F5F0] bg-[#181715] hover:bg-[#2E2B27] rounded-none border border-[#181715] transition-transform hover:-translate-y-0.5 cursor-pointer"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span>Asesor de Colección</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- DIRECT PURCHASE / LOOKBOOK PIECE MODAL -->
+    <div id="buy-modal" role="dialog" aria-modal="true" aria-label="Ficha de Compra Directa" class="hidden fixed inset-0 z-50 items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+      <div class="bg-[#F7F5F0] border border-[#181715] rounded-none max-w-lg w-full p-6 sm:p-8 space-y-5">
+        <div class="flex items-start justify-between gap-4 border-b border-[#DCD6CC] pb-4">
+          <div class="space-y-1">
+            <p id="buy-modal-category" class="text-[11px] uppercase tracking-widest text-[#6B6358]">COLECCIÓN OFICIAL</p>
+            <h3 id="buy-modal-name" class="font-editorial text-2xl sm:text-3xl font-normal text-[#181715]"></h3>
+          </div>
+          <button type="button" id="close-buy-modal-btn" aria-label="Cerrar ficha de pieza" class="p-1.5 text-[#5A534A] hover:text-[#181715] cursor-pointer">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-12 border border-[#DCD6CC] bg-white">
+          <div class="sm:col-span-5 aspect-4/3 sm:aspect-auto bg-[#EFECE6] border-b sm:border-b-0 sm:border-r border-[#DCD6CC]">
+            <img id="buy-modal-img" src="" alt="" referrerpolicy="no-referrer" class="w-full h-full object-cover" />
+          </div>
+          <div class="sm:col-span-7 p-4 flex flex-col justify-between space-y-3">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs text-[#6B6358]">Valor de pieza</span>
+                <span id="buy-modal-price" class="text-sm font-medium font-mono-num text-[#181715]"></span>
+              </div>
+              <p id="buy-modal-feature" class="text-xs text-[#4A443C] leading-relaxed"></p>
+            </div>
+            <p id="buy-modal-url" class="text-[11px] font-mono-num accent-text truncate"></p>
+          </div>
+        </div>
+
+        <p id="buy-modal-policies" class="text-xs text-[#4A443C] leading-relaxed bg-[#EFECE6] border border-[#DCD6CC] p-3.5"></p>
+
+        <div id="buy-modal-confirm-msg" class="hidden bg-white border border-[#181715] p-3.5 text-xs text-[#181715] font-medium">
+          Redirigiendo a la ficha de compra oficial de la pieza...
+        </div>
+
+        <div class="flex items-center gap-3 pt-1">
+          <button type="button" id="confirm-direct-buy-btn" class="flex-1 py-3.5 px-5 text-[10px] font-medium uppercase tracking-widest text-[#F7F5F0] bg-[#181715] hover:bg-[#2E2B27] rounded-none transition-colors cursor-pointer">
+            Ir a Finalizar Compra →
+          </button>
+          <button type="button" id="cancel-buy-modal-btn" class="py-3.5 px-4 text-[10px] font-medium uppercase tracking-widest text-[#181715] bg-transparent border border-[#DCD6CC] hover:border-[#181715] rounded-none cursor-pointer">
+            Volver
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDITORIAL FOOTER -->
+    <footer class="border-t border-[#DCD6CC] bg-[#F7F5F0] py-5 px-6 sm:px-10 text-xs text-[#6B6358]">
+      <div class="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span id="footer-brand-copy"></span>
+        <span>Gorriti 4820, Palermo Soho · Buenos Aires</span>
+      </div>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- VANILLA JAVASCRIPT APPLICATION: BRAND_CONFIG & MULTIMODAL ADVISOR     -->
+    <!-- ===================================================================== -->
+    <script>
+      function makeSvgUri(svgStr) {
+        return 'data:image/svg+xml;utf8,' + encodeURIComponent(svgStr.trim());
+      }
+
+      const STYLE_PRESETS = {
+        atelier: {
+          id: "atelier",
+          name: "Atelier & Autor",
+          fontDisplay: "'Instrument Serif', Georgia, serif",
+          fontSans: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+          theme: {
+            bgPrimary: "#F7F5F0",
+            bgSecondary: "#EFECE6",
+            textPrimary: "#181715",
+            accentColor: "#8C5835",
+            hairlineColor: "#DCD6CC"
+          }
+        },
+        botanical: {
+          id: "botanical",
+          name: "Botánica & Clínica",
+          fontDisplay: "'Fraunces', Georgia, serif",
+          fontSans: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+          theme: {
+            bgPrimary: "#F4F6F2",
+            bgSecondary: "#E8ECE4",
+            textPrimary: "#18241B",
+            accentColor: "#2D5A3F",
+            hairlineColor: "#D3DCD0"
+          }
+        },
+        technical: {
+          id: "technical",
+          name: "Técnico & Urbano",
+          fontDisplay: "'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif",
+          fontSans: "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+          theme: {
+            bgPrimary: "#F2F4F7",
+            bgSecondary: "#E4E7EC",
+            textPrimary: "#0F172A",
+            accentColor: "#D9381E",
+            hairlineColor: "#CBD5E1"
+          }
+        }
+      };
+
+      function generateMonogramSvg(fontFamily) {
+        return makeSvgUri(
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">' +
+            '<rect width="120" height="120" fill="#181715"/>' +
+            '<text x="60" y="74" text-anchor="middle" fill="#F7F5F0" font-family="' + fontFamily.replace(/"/g, "'") + '" font-size="46" font-weight="600" letter-spacing="3">EY</text>' +
+          '</svg>'
+        );
+      }
+
+      const BRAND_CONFIG = {
+        brandName: "EL YEITE · Taller de Muebles",
+        tagline: "Muebles de Diseño, Maderas Nobles y Tapicería a Medida",
+        logoUrl: generateMonogramSvg(STYLE_PRESETS.atelier.fontDisplay),
+        stylePreset: "atelier",
+        theme: {
+          bgPrimary: "#F7F5F0",
+          bgSecondary: "#EFECE6",
+          textPrimary: "#181715",
+          accentColor: "#8C5835",
+          hairlineColor: "#DCD6CC"
+        },
+        shippingAndReturns: "Envíos a todo el país · Cuotas sin interés · Fabricación artesanal y géneros antimanchas",
+        quickPrompts: [
+          "Consultar por Sillón Sure",
+          "Subir foto de mi living",
+          "Medidas y telas antimanchas"
+        ],
+        products: [
+          {
+            id: "EY-SURE",
+            name: "Sillón Sure",
+            price: "$ 890.000 ARS",
+            category: "espacio",
+            features: [
+              "Estructura robusta en madera maciza estacionada con terminación artesanal",
+              "Tapizado en género de alto tránsito con tratamiento antimanchas, fresco y fácil de limpiar",
+              "Proporción ergonómica ideal para rincones de lectura o livings de 1.30 a 1.50 metros"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://elyeite.com/productos/sillon-sure"
+          },
+          {
+            id: "CR-02",
+            name: "Lámpara de Pie Arco Travertino 2700K",
+            price: "$ 420.000 ARS",
+            category: "espacio",
+            features: [
+              "Base esculpida en piedra travertino natural y arco de bronce cepillado",
+              "Globo difusor opal con LED cálido 2700K dimeable (1200 lúmenes)",
+              "Altura 165 cm: ilumina esquinas oscuras sin necesidad de obra eléctrica en techo"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-02-lampara-arco-travertino"
+          },
+          {
+            id: "CR-03",
+            name: "Mesa Lateral Bloque Travertino & Roble",
+            price: "$ 340.000 ARS",
+            category: "espacio",
+            features: [
+              "Tapa circular de piedra travertino apomazada de 45 cm de diámetro",
+              "Base trípode en roble ahumado macizo (52 cm de altura)",
+              "Ideal como mesa de apoyo junto a sillones bajos o camas"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1532372320572-cda25653a26d?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-03-mesa-lateral-travertino"
+          },
+          {
+            id: "CR-04",
+            name: "Alfombra Telar Pura Lana Virgen Cruda 200×300",
+            price: "$ 610.000 ARS",
+            category: "espacio",
+            features: [
+              "Tejida a mano en telar horizontal con 100% lana virgen patagónica sin teñir",
+              "Medida 200 × 300 cm de alto tránsito y aislación acústica/térmica natural",
+              "Unifica livings con piso de madera, porcelanato o cemento alisado"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1600166898405-da9535204843?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-04-alfombra-telar-lana"
+          },
+          {
+            id: "CR-05",
+            name: "Difusor Ultrasónico Cerámica Gres & Cedro",
+            price: "$ 115.000 ARS",
+            category: "espacio",
+            features: [
+              "Carcasa artesanal en cerámica gres horneada a 1240°C color piedra",
+              "Incluye blend botánico de madera de cedro, bergamota y vetiver (30 ml)",
+              "Excelente opción de regalo de diseño para casa o estudio (corte automático 8h)"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1602928321679-560bb453f190?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-05-difusor-ceramica-gres"
+          },
+          {
+            id: "CR-06",
+            name: "Sérum Botánico Hialurónico 2% + Niacinamida 5%",
+            price: "$ 48.500 ARS",
+            category: "piel",
+            features: [
+              "Ácido hialurónico de doble peso molecular para hidratación profunda sin grasitud",
+              "Niacinamida al 5% que calma rojeces, equilibra poros y devuelve luminosidad",
+              "Frasco gotero ámbar 30 ml libre de fragancia, apto piel sensible o deshidratada"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-06-serum-hialuronico-niacinamida"
+          },
+          {
+            id: "CR-07",
+            name: "Emulsión Barrera Ceramidas III & Escualano Puro",
+            price: "$ 54.000 ARS",
+            category: "piel",
+            features: [
+              "Complejo bio-idéntico de Ceramidas III y escualano vegetal de oliva (50 ml)",
+              "Repara la barrera cutánea frente a tirantez, clima frío o descamación",
+              "Textura sedosa no comedogénica para sellar la rutina de día y de noche"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-07-emulsion-barrera-ceramidas"
+          },
+          {
+            id: "CR-08",
+            name: "Contorno de Ojos Péptidos de Cobre & Cafeína",
+            price: "$ 44.000 ARS",
+            category: "piel",
+            features: [
+              "Cafeína pura al 3% y péptidos descongestivos para bolsas y ojeras vasculares",
+              "Aplicador metálico frío que desinflama la mirada en 60 segundos (15 ml)",
+              "Ideal para signos de cansancio frente a pantallas o piel fina en párpados"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-08-contorno-ojos-peptidos"
+          },
+          {
+            id: "CR-09",
+            name: "Óleo Limpiador Botánico Jojoba & Camelia",
+            price: "$ 41.000 ARS",
+            category: "piel",
+            features: [
+              "Emulsiona con agua tibia retirando protector solar y maquillaje sin irritar",
+              "Prensado en frío de jojoba dorada y camelia japonesa (120 ml)",
+              "Deja la piel elástica y limpia sin alterar el manto hidrolipídico"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-09-oleo-limpiador-jojoba"
+          },
+          {
+            id: "CR-10",
+            name: "Sobrecamisa Sastrera Lana Merino Patagónica",
+            price: "$ 310.000 ARS",
+            category: "prenda",
+            features: [
+              "100% lana merino superfina (280 g/m²) en color Gris Grafito, no pica ni hace peeling",
+              "Corte boxy sastrero relajado disponible en talles S, M, L y XL",
+              "Funciona como tercera prenda urbana sobre remera blanca o camisa oxford"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-10-sobrecamisa-merino"
+          },
+          {
+            id: "CR-11",
+            name: "Pantalón Cargo Sastrero Gabardina Orgánica 10 oz",
+            price: "$ 195.000 ARS",
+            category: "prenda",
+            features: [
+              "Gabardina esmerilada de algodón orgánico 10 oz en tono Arena Piedra",
+              "Corte recto con pinzas sastreras y bolsillos laterales planos (talles 38 al 46)",
+              "Calce cómodo y estructurado para uso diario en estudio o viaje"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-11-pantalon-cargo-gabardina"
+          },
+          {
+            id: "CR-12",
+            name: "Sweater Cuello Medio Cashmere & Merino Crudo",
+            price: "$ 265.000 ARS",
+            category: "prenda",
+            features: [
+              "Hilado noble 70% lana merino superfina + 30% cashmere en punto inglés",
+              "Talles S, M, L y XL con hombro caído arquitectónico y puños acanalados",
+              "Regalo infalible de invierno y media estación con packaging de lienzo"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-12-sweater-cashmere-merino"
+          },
+          {
+            id: "CR-13",
+            name: "Tote Bag Cuero Vacuno Curtido Vegetal & Lona",
+            price: "$ 230.000 ARS",
+            category: "prenda",
+            features: [
+              "Lona impermeable de 16 oz combinada con manijas y base en cuero vacuno suela",
+              "Compartimento acolchado para notebook de hasta 16 pulgadas (42×35×14 cm)",
+              "Excelente regalo unisex de uso diario o escapada de fin de semana"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-13-tote-bag-cuero-vegetal"
+          },
+          {
+            id: "CR-14",
+            name: "Kit Service Grupo E61: Junta Silicona 8.5mm + Ducha IMS",
+            price: "$ 68.000 ARS",
+            category: "repuesto",
+            features: [
+              "Junta de silicona roja Ø 73×57×8.5mm grado alimenticio que no se cristaliza",
+              "Membrana difusora IMS de acero inoxidable 200 µm para extracción pareja",
+              "Elimina fugas laterales en cafeteras espresso grupo E61 de 58 mm"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-14-kit-service-e61-ims"
+          },
+          {
+            id: "CR-15",
+            name: "Portafiltro Naked 58mm Latón CNC & Mango Nogal",
+            price: "$ 145.000 ARS",
+            category: "repuesto",
+            features: [
+              "Cabezal sin fondo mecanizado CNC en latón cromado con aletas de 6.2mm (E61)",
+              "Incluye canasto de precisión de 18g y mango ergonómico en madera de nogal",
+              "Permite diagnosticar canalización en vivo y obtener crema densa"
+            ],
+            imageUrl: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?auto=format&fit=crop&w=900&q=85",
+            buyUrl: "https://casario.ar/comprar/cr-15-portafiltro-naked-58mm"
+          }
+        ]
+      };
+
+      const DIAGNOSTIC_PRESETS = [
+        {
+          id: "preset-espacio",
+          label: "Rincón de lectura con luz tenue",
+          subtitle: "Interiores & Iluminación",
+          category: "espacio",
+          prompt: "Subo foto de esta esquina de mi living (tengo 1.20m libres y entra poca luz). ¿Qué me recomendás de la colección?",
+          visualClues: "Esquina interior de 1.20m con piso de madera e iluminación natural baja que requiere sillón compacto cálido y luz 2700K.",
+          previewUri: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=700&q=80"
+        },
+        {
+          id: "preset-piel",
+          label: "Piel sensible con tirantez",
+          subtitle: "Botánica Dérmica",
+          category: "piel",
+          prompt: "Te subo foto de mi piel hoy: la siento deshidratada, tirante y con algo de rojez. ¿Qué rutina puntual me armás?",
+          visualClues: "Piel con deshidratación superficial y leve eritema en pómulos que pide ácido hialurónico 2%, niacinamida y ceramidas.",
+          previewUri: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=700&q=80"
+        },
+        {
+          id: "preset-prenda",
+          label: "Sastrería urbana de media estación",
+          subtitle: "Indumentaria Merino",
+          category: "prenda",
+          prompt: "Tengo esta base neutra para ir al estudio. ¿Qué talle y prenda sastrera me recomendás sumar?",
+          visualClues: "Base urbana neutra en algodón que gana estructura con sobrecamisa sastrera en lana merino y pantalón gabardina 10 oz.",
+          previewUri: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=700&q=80"
+        },
+        {
+          id: "preset-repuesto",
+          label: "Cabezal Espresso E61 con fuga",
+          subtitle: "Precisión & Café",
+          category: "repuesto",
+          prompt: "Te paso foto del cabezal de mi cafetera E61: pierde agua por el costado del portafiltro de 58mm.",
+          visualClues: "Grupo espresso E61 de 58mm con junta de caucho reseca y ducha desgastada, provocando fuga lateral de presión.",
+          previewUri: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=80"
+        }
+      ];
+
+      let currentViewMode = "bio";
+      let isWidgetExpanded = true;
+      let storeCategoryFilter = "all";
+      let pendingImageDataUri = null;
+      let pendingImageMimeType = null;
+      let pendingVisualClues = null;
+      let pendingImageLabel = null;
+      let currentProduct = null;
+      let isAdvisorLoading = false;
+
+      const conversationTurns = [
+        {
+          role: "advisor",
+          output: {
+            visualAnalysis: null,
+            advisorMessage: "Bienvenido al espacio de asesoramiento de " + BRAND_CONFIG.brandName + ". Podés compartir una fotografía de tu ambiente, tu piel, una prenda o tu equipo espresso para indicarte con exactitud las piezas de nuestra colección que mejor responden a lo que buscás.",
+            recommendedProducts: [
+              {
+                id: BRAND_CONFIG.products[0].id,
+                matchReason: BRAND_CONFIG.products[0].features[2],
+                name: BRAND_CONFIG.products[0].name,
+                price: BRAND_CONFIG.products[0].price,
+                imageUrl: BRAND_CONFIG.products[0].imageUrl,
+                buyUrl: BRAND_CONFIG.products[0].buyUrl
+              },
+              {
+                id: BRAND_CONFIG.products[5].id,
+                matchReason: BRAND_CONFIG.products[5].features[0],
+                name: BRAND_CONFIG.products[5].name,
+                price: BRAND_CONFIG.products[5].price,
+                imageUrl: BRAND_CONFIG.products[5].imageUrl,
+                buyUrl: BRAND_CONFIG.products[5].buyUrl
+              }
+            ],
+            closingQuestion: "¿Preferís subir una foto para hacer el diagnóstico visual o buscás medidas y talles de alguna pieza puntual?"
+          }
+        }
+      ];
+
+      function applyBrandConfigToDOM() {
+        const root = document.documentElement;
+        const currentPresetId = BRAND_CONFIG.stylePreset || "atelier";
+        const preset = STYLE_PRESETS[currentPresetId] || STYLE_PRESETS.atelier;
+
+        root.style.setProperty("--font-display", preset.fontDisplay);
+        root.style.setProperty("--font-sans", preset.fontSans);
+
+        const bgPrimary = BRAND_CONFIG.theme.bgPrimary || preset.theme.bgPrimary;
+        const bgSecondary = BRAND_CONFIG.theme.bgSecondary || preset.theme.bgSecondary;
+        const textPrimary = BRAND_CONFIG.theme.textPrimary || preset.theme.textPrimary;
+        const accentColor = BRAND_CONFIG.theme.accentColor || preset.theme.accentColor;
+        const hairlineColor = BRAND_CONFIG.theme.hairlineColor || preset.theme.hairlineColor;
+
+        root.style.setProperty("--bg-primary", bgPrimary);
+        root.style.setProperty("--bg-secondary", bgSecondary);
+        root.style.setProperty("--text-primary", textPrimary);
+        root.style.setProperty("--accent-color", accentColor);
+        root.style.setProperty("--hairline", hairlineColor);
+
+        if (typeof generateMonogramSvg === "function") {
+          BRAND_CONFIG.logoUrl = generateMonogramSvg(preset.fontDisplay);
+        }
+
+        document.getElementById("bio-logo").src = BRAND_CONFIG.logoUrl;
+        document.getElementById("widget-logo").src = BRAND_CONFIG.logoUrl;
+
+        document.getElementById("header-brand-link").textContent = BRAND_CONFIG.brandName.split("·")[0].trim();
+        document.getElementById("bio-brand-title").textContent = BRAND_CONFIG.brandName;
+        document.getElementById("bio-brand-tagline").textContent = BRAND_CONFIG.tagline;
+        document.getElementById("widget-brand-name").textContent = BRAND_CONFIG.brandName;
+        document.getElementById("shipping-returns-bar").textContent = BRAND_CONFIG.shippingAndReturns;
+        document.getElementById("footer-brand-copy").textContent = BRAND_CONFIG.brandName + " — " + BRAND_CONFIG.tagline;
+
+        const presetSelect = document.getElementById("input-style-preset");
+        if (presetSelect) {
+          presetSelect.value = currentPresetId;
+        }
+        document.getElementById("input-brand-name").value = BRAND_CONFIG.brandName;
+        document.getElementById("input-brand-tagline").value = BRAND_CONFIG.tagline;
+        document.getElementById("input-accent-color").value = BRAND_CONFIG.theme.accentColor;
+        document.getElementById("input-shipping").value = BRAND_CONFIG.shippingAndReturns;
+
+        renderQuickPrompts();
+        renderStoreCatalog();
+        renderConversationThreads();
+      }
+
+      function renderQuickPrompts() {
+        const bioContainer = document.getElementById("bio-quick-prompts");
+        const widgetContainer = document.getElementById("widget-quick-prompts");
+        bioContainer.innerHTML = "";
+        widgetContainer.innerHTML = "";
+
+        BRAND_CONFIG.quickPrompts.forEach((promptText) => {
+          const btnBio = document.createElement("button");
+          btnBio.type = "button";
+          btnBio.className = "px-4 py-2 text-xs font-medium text-[#181715] bg-white hover:bg-[#181715] hover:text-[#F7F5F0] border border-[#DCD6CC] rounded-none transition-colors whitespace-nowrap shrink-0 cursor-pointer";
+          btnBio.textContent = promptText;
+          btnBio.addEventListener("click", () => handleQuickPromptClick(promptText));
+          bioContainer.appendChild(btnBio);
+
+          const btnWidget = document.createElement("button");
+          btnWidget.type = "button";
+          btnWidget.className = "px-3 py-1.5 text-[11px] font-medium text-[#181715] bg-white hover:bg-[#181715] hover:text-[#F7F5F0] border border-[#DCD6CC] rounded-none transition-colors whitespace-nowrap shrink-0 cursor-pointer";
+          btnWidget.textContent = promptText;
+          btnWidget.addEventListener("click", () => handleQuickPromptClick(promptText));
+          widgetContainer.appendChild(btnWidget);
+        });
+      }
+
+      function handleQuickPromptClick(promptText) {
+        if (promptText.toLowerCase().includes("foto")) {
+          const spacePreset = DIAGNOSTIC_PRESETS[0];
+          triggerDiagnosticPreset(spacePreset);
+        } else {
+          sendAdvisorMessage(promptText);
+        }
+      }
+
+      function renderDiagnosticPresets() {
+        const grid = document.getElementById("diagnostic-presets-grid");
+        grid.innerHTML = "";
+        DIAGNOSTIC_PRESETS.forEach((preset) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "group text-left bg-[#FAF8F5] hover:bg-[#EFECE6] rounded-none overflow-hidden transition-colors cursor-pointer flex flex-col justify-between";
+          btn.innerHTML =
+            '<div class="aspect-4/3 w-full bg-[#EAE5DC] overflow-hidden border-b border-[#DCD6CC]">' +
+              '<img src="' + preset.previewUri + '" alt="' + escapeHtml(preset.label) + '" referrerpolicy="no-referrer" class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-[1.02]" />' +
+            '</div>' +
+            '<div class="p-3.5 space-y-1">' +
+              '<p class="text-[10px] uppercase tracking-widest text-[#6B6358]">' + escapeHtml(preset.subtitle) + '</p>' +
+              '<p class="font-editorial text-base font-medium text-[#181715] leading-snug">' + escapeHtml(preset.label) + '</p>' +
+            '</div>';
+          btn.addEventListener("click", () => triggerDiagnosticPreset(preset));
+          grid.appendChild(btn);
+        });
+      }
+
+      function triggerDiagnosticPreset(preset) {
+        setPendingImage(preset.previewUri, "image/jpeg", preset.visualClues, preset.label);
+        sendAdvisorMessage(preset.prompt);
+      }
+
+      function setPendingImage(dataUri, mimeType, visualClues, label) {
+        pendingImageDataUri = dataUri;
+        pendingImageMimeType = mimeType || "image/jpeg";
+        pendingVisualClues = visualClues || null;
+        pendingImageLabel = label || "Fotografía adjunta";
+
+        const bioBox = document.getElementById("bio-image-preview-box");
+        const bioImg = document.getElementById("bio-image-preview-img");
+        const bioLbl = document.getElementById("bio-image-preview-label");
+
+        const widBox = document.getElementById("widget-image-preview-box");
+        const widImg = document.getElementById("widget-image-preview-img");
+
+        if (dataUri) {
+          bioImg.src = dataUri;
+          bioLbl.textContent = pendingImageLabel;
+          bioBox.classList.remove("hidden");
+          bioBox.classList.add("flex");
+
+          widImg.src = dataUri;
+          widBox.classList.remove("hidden");
+          widBox.classList.add("flex");
+        } else {
+          bioBox.classList.add("hidden");
+          bioBox.classList.remove("flex");
+          widBox.classList.add("hidden");
+          widBox.classList.remove("flex");
+        }
+      }
+
+      function handleFileSelected(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          const dataUri = ev.target.result;
+          setPendingImage(dataUri, file.type || "image/jpeg", null, file.name);
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function createTurnElement(turn, compactMode) {
+        const wrapper = document.createElement("div");
+
+        if (turn.role === "user") {
+          wrapper.className = "ml-auto max-w-xl bg-[#181715] text-[#F7F5F0] rounded-none p-5 space-y-3 border border-[#181715]";
+          let imgHtml = "";
+          if (turn.imageUri) {
+            imgHtml =
+              '<div class="w-44 aspect-4/3 bg-[#262320] border border-[#3B3734] overflow-hidden">' +
+                '<img src="' + turn.imageUri + '" alt="Fotografía enviada" referrerpolicy="no-referrer" class="w-full h-full object-cover" />' +
+              '</div>';
+          }
+          wrapper.innerHTML =
+            '<div class="flex items-center justify-between text-[10px] uppercase tracking-widest text-[#B8B0A2]">' +
+              '<span>Consulta de Cliente</span>' +
+              (turn.imageLabel ? '<span>' + escapeHtml(turn.imageLabel) + '</span>' : '') +
+            '</div>' +
+            imgHtml +
+            '<p class="text-sm leading-relaxed">' + escapeHtml(turn.text) + '</p>';
+          return wrapper;
+        }
+
+        const out = turn.output;
+        wrapper.className = "chat-turn-card bg-white border border-[#DCD6CC] rounded-none p-5 sm:p-6 space-y-4";
+
+        let visualBadgeHtml = "";
+        if (out.visualAnalysis && out.visualAnalysis !== "null") {
+          visualBadgeHtml =
+            '<div class="bg-[#F7F5F0] border border-[#DCD6CC] p-3.5 space-y-1">' +
+              '<p class="text-[10px] uppercase tracking-widest accent-text font-medium">Lectura Visual del Espacio / Pieza</p>' +
+              '<p class="text-xs text-[#3A352F] leading-relaxed">' + escapeHtml(out.visualAnalysis) + '</p>' +
+            '</div>';
+        }
+
+        let productsHtml = "";
+        if (Array.isArray(out.recommendedProducts) && out.recommendedProducts.length > 0) {
+          const imgWidthClass = compactMode ? "sm:w-28" : "sm:w-40 md:w-44";
+          const titleSizeClass = compactMode ? "text-lg" : "text-xl";
+          const cards = out.recommendedProducts.map((prod) => {
+            const catalogItem = BRAND_CONFIG.products.find((p) => p.id === prod.id) || prod;
+            const imgSrc = catalogItem.imageUrl || prod.imageUrl;
+            return (
+              '<article class="flex flex-col sm:flex-row items-stretch bg-[#FAF8F5] border border-[#DCD6CC] rounded-none overflow-hidden">' +
+                '<div class="' + imgWidthClass + ' aspect-4/3 sm:aspect-auto bg-[#EFECE6] shrink-0 border-b sm:border-b-0 sm:border-r border-[#DCD6CC] overflow-hidden">' +
+                  '<img src="' + imgSrc + '" alt="' + escapeHtml(prod.name) + '" referrerpolicy="no-referrer" class="w-full h-full object-cover" />' +
+                '</div>' +
+                '<div class="flex-1 min-w-0 p-4 flex flex-col justify-between gap-3">' +
+                  '<div class="space-y-1.5">' +
+                    '<div class="flex items-baseline justify-between gap-3 border-b border-[#DCD6CC] pb-1.5">' +
+                      '<h4 class="font-editorial ' + titleSizeClass + ' font-medium text-[#181715] leading-snug">' + escapeHtml(prod.name) + '</h4>' +
+                      '<span class="font-mono-num text-xs font-medium text-[#181715] whitespace-nowrap shrink-0">' + escapeHtml(prod.price) + '</span>' +
+                    '</div>' +
+                    '<p class="font-editorial italic text-sm text-[#3A352F] leading-relaxed">' + escapeHtml(prod.matchReason) + '</p>' +
+                  '</div>' +
+                  '<div class="pt-1 flex items-center justify-between gap-3">' +
+                    '<span class="text-[10px] uppercase tracking-widest text-[#6B6358]">Disponibilidad inmediata</span>' +
+                    '<button type="button" data-buy-id="' + escapeHtml(prod.id) + '" class="buy-now-btn bg-[#181715] hover:bg-[#2E2B27] text-[#F7F5F0] uppercase tracking-widest text-[10px] py-3 px-5 rounded-none transition-colors whitespace-nowrap shrink-0 cursor-pointer">' +
+                      'VER PIEZA / COMPRAR →' +
+                    '</button>' +
+                  '</div>' +
+                '</div>' +
+              '</article>'
+            );
+          }).join("");
+
+          productsHtml = '<div class="space-y-3">' + cards + '</div>';
+        }
+
+        wrapper.innerHTML =
+          '<div class="flex items-center justify-between text-[11px] text-[#6B6358] border-b border-[#DCD6CC] pb-2.5">' +
+            '<span class="uppercase tracking-widest font-medium accent-text">Asesoría · ' + escapeHtml(BRAND_CONFIG.brandName) + '</span>' +
+            '<span class="accent-bg text-[#F7F5F0] px-2 py-0.5 text-[9px] uppercase tracking-widest">Curaduría Oficial</span>' +
+          '</div>' +
+          visualBadgeHtml +
+          '<p class="text-sm leading-relaxed text-[#181715]">' + escapeHtml(out.advisorMessage) + '</p>' +
+          productsHtml +
+          (out.closingQuestion
+            ? '<p class="font-editorial italic text-base text-[#4A443C] pt-2.5 border-t border-[#DCD6CC]">“' + escapeHtml(out.closingQuestion) + '”</p>'
+            : '');
+
+        wrapper.querySelectorAll(".buy-now-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const prodId = btn.getAttribute("data-buy-id");
+            openBuyModal(prodId);
+          });
+        });
+
+        return wrapper;
+      }
+
+      function createLoadingElement() {
+        const el = document.createElement("div");
+        el.className = "bg-white border border-[#DCD6CC] rounded-none p-5 space-y-3 editorial-loading-bar";
+        el.innerHTML =
+          '<div class="flex items-center justify-between text-[10px] uppercase tracking-widest text-[#6B6358]">' +
+            '<span>Evaluando consulta e imagen</span>' +
+            '<span>Seleccionando piezas...</span>' +
+          '</div>' +
+          '<div class="h-3 bg-[#EFECE6] w-3/4"></div>' +
+          '<div class="h-3 bg-[#EFECE6] w-1/2"></div>';
+        return el;
+      }
+
+      let pendingUserTurnInFlight = null;
+
+      function scrollThreadsToBottom() {
+        const bioThread = document.getElementById("bio-chat-thread");
+        const widgetThread = document.getElementById("widget-chat-thread");
+        if (bioThread && bioThread.children.length > 0) {
+          const target = bioThread.lastElementChild;
+          const offset = Math.max(0, target.offsetTop - bioThread.offsetTop - 12);
+          bioThread.scrollTo({ top: offset, behavior: "smooth" });
+        }
+        if (widgetThread && widgetThread.children.length > 0) {
+          const target = widgetThread.lastElementChild;
+          const offset = Math.max(0, target.offsetTop - widgetThread.offsetTop - 12);
+          widgetThread.scrollTo({ top: offset, behavior: "smooth" });
+        }
+      }
+
+      function renderConversationThreads() {
+        const bioThread = document.getElementById("bio-chat-thread");
+        const widgetThread = document.getElementById("widget-chat-thread");
+        bioThread.innerHTML = "";
+        widgetThread.innerHTML = "";
+
+        conversationTurns.forEach((turn) => {
+          bioThread.appendChild(createTurnElement(turn, false));
+          widgetThread.appendChild(createTurnElement(turn, true));
+        });
+
+        if (isAdvisorLoading) {
+          if (pendingUserTurnInFlight) {
+            bioThread.appendChild(createTurnElement(pendingUserTurnInFlight, false));
+            widgetThread.appendChild(createTurnElement(pendingUserTurnInFlight, true));
+          }
+          bioThread.appendChild(createLoadingElement());
+          widgetThread.appendChild(createLoadingElement());
+        }
+      }
+
+      function renderStoreCatalog() {
+        const grid = document.getElementById("store-products-grid");
+        grid.innerHTML = "";
+
+        const items = BRAND_CONFIG.products.filter((p) =>
+          storeCategoryFilter === "all" ? true : p.category === storeCategoryFilter
+        );
+
+        items.forEach((prod) => {
+          const card = document.createElement("article");
+          card.className = "bg-[#F7F5F0] rounded-none flex flex-col justify-between";
+          card.innerHTML =
+            '<div>' +
+              '<div class="aspect-4/3 bg-[#EFECE6] border-b border-[#DCD6CC] overflow-hidden">' +
+                '<img src="' + prod.imageUrl + '" alt="' + escapeHtml(prod.name) + '" referrerpolicy="no-referrer" class="w-full h-full object-cover transition-transform duration-200 hover:scale-[1.02]" />' +
+              '</div>' +
+              '<div class="p-6 space-y-2.5">' +
+                '<div class="flex items-baseline justify-between gap-3 border-b border-[#DCD6CC] pb-2.5">' +
+                  '<h3 class="font-editorial text-2xl font-medium text-[#181715] leading-snug">' + escapeHtml(prod.name) + '</h3>' +
+                  '<span class="font-mono-num text-xs font-medium text-[#181715] whitespace-nowrap shrink-0">' + escapeHtml(prod.price) + '</span>' +
+                '</div>' +
+                '<p class="text-xs text-[#4A443C] leading-relaxed">' + escapeHtml(prod.features[0] || '') + '</p>' +
+              '</div>' +
+            '</div>' +
+            '<div class="px-6 pb-6 pt-2 flex items-center gap-2">' +
+              '<button type="button" data-ask-id="' + escapeHtml(prod.id) + '" class="store-ask-btn flex-1 py-3 px-3 text-[10px] uppercase tracking-widest font-medium text-[#181715] bg-transparent hover:bg-[#EFECE6] border border-[#DCD6CC] rounded-none cursor-pointer">' +
+                'Consultar Asesor' +
+              '</button>' +
+              '<button type="button" data-buy-id="' + escapeHtml(prod.id) + '" class="store-buy-btn py-3 px-5 text-[10px] uppercase tracking-widest font-medium text-[#F7F5F0] bg-[#181715] hover:bg-[#2E2B27] rounded-none cursor-pointer">' +
+                'VER PIEZA / COMPRAR →' +
+              '</button>' +
+            '</div>';
+
+          card.querySelector(".store-buy-btn").addEventListener("click", () => openBuyModal(prod.id));
+          card.querySelector(".store-ask-btn").addEventListener("click", () => {
+            isWidgetExpanded = true;
+            updateWidgetVisibility();
+            sendAdvisorMessage("Hola, contame sobre " + prod.name + ": ¿para qué caso lo recomendás?");
+          });
+
+          grid.appendChild(card);
+        });
+      }
+
+      async function sendAdvisorMessage(rawText) {
+        const text = (rawText || "").trim();
+        const hasImage = Boolean(pendingImageDataUri);
+        if (!text && !hasImage) return;
+
+        const sentImageUri = pendingImageDataUri;
+        const sentMimeType = pendingImageMimeType;
+        const sentClues = pendingVisualClues;
+        const sentLabel = pendingImageLabel;
+
+        document.getElementById("bio-chat-input").value = "";
+        document.getElementById("widget-chat-input").value = "";
+        setPendingImage(null, null, null, null);
+
+        const userTurn = {
+          role: "user",
+          text: text || "Analizá esta fotografía y recomendame qué piezas elegir de la colección.",
+          imageUri: sentImageUri,
+          imageLabel: sentLabel
+        };
+
+        const submitBtn = document.getElementById("bio-submit-btn");
+        submitBtn.textContent = "Analizando...";
+        submitBtn.disabled = true;
+
+        const historyPayload = conversationTurns.slice(-6).map((t) => ({
+          role: t.role === "advisor" ? "model" : "user",
+          text: t.role === "advisor" ? JSON.stringify(t.output) : t.text
+        }));
+
+        // Push user turn in natural chronological order and show loading skeleton
+        pendingUserTurnInFlight = userTurn;
+        isAdvisorLoading = true;
+        renderConversationThreads();
+        scrollThreadsToBottom();
+
+        try {
+          let base64Clean = "";
+          if (sentImageUri && sentImageUri.includes(";base64,")) {
+            base64Clean = sentImageUri.split(";base64,")[1];
+          }
+
+          const response = await fetch("/api/advisor/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: userTurn.text,
+              imageBase64: base64Clean || undefined,
+              imageMimeType: sentMimeType || undefined,
+              imageUrl: !base64Clean && sentImageUri ? sentImageUri : undefined,
+              visualClues: sentClues || undefined,
+              history: historyPayload,
+              brandConfig: BRAND_CONFIG
+            })
+          });
+
+          const data = await response.json();
+          const advisorTurn = {
+            role: "advisor",
+            output: data.structured
+          };
+
+          pendingUserTurnInFlight = null;
+          isAdvisorLoading = false;
+          conversationTurns.push(userTurn, advisorTurn);
+          renderConversationThreads();
+          scrollThreadsToBottom();
+        } catch (_err) {
+          const fallbackAdvisorTurn = {
+            role: "advisor",
+            output: {
+              visualAnalysis: hasImage ? (sentClues || "Fotografía evaluada con los criterios de la colección.") : null,
+              advisorMessage: "Para lo que estás buscando en " + BRAND_CONFIG.brandName + ", estas dos piezas de nuestra colección encajan con precisión.",
+              recommendedProducts: BRAND_CONFIG.products.slice(0, 2).map((p) => ({
+                id: p.id,
+                matchReason: p.features[0],
+                name: p.name,
+                price: p.price,
+                imageUrl: p.imageUrl,
+                buyUrl: p.buyUrl
+              })),
+              closingQuestion: "¿Lo buscás para envío express hoy o preferís chequear medidas exactas?"
+            }
+          };
+          pendingUserTurnInFlight = null;
+          isAdvisorLoading = false;
+          conversationTurns.push(userTurn, fallbackAdvisorTurn);
+          renderConversationThreads();
+          scrollThreadsToBottom();
+        } finally {
+          submitBtn.textContent = "Enviar Consulta →";
+          submitBtn.disabled = false;
+        }
+      }
+
+      function openBuyModal(productId) {
+        const prod = BRAND_CONFIG.products.find((p) => p.id === productId) || BRAND_CONFIG.products[0];
+        currentProduct = prod;
+        document.getElementById("buy-modal-name").textContent = prod.name;
+        document.getElementById("buy-modal-category").textContent = "COLECCIÓN OFICIAL · " + prod.category.toUpperCase();
+        document.getElementById("buy-modal-price").textContent = prod.price;
+        document.getElementById("buy-modal-feature").textContent = prod.features[0] || "";
+        document.getElementById("buy-modal-url").textContent = prod.buyUrl;
+        document.getElementById("buy-modal-img").src = prod.imageUrl;
+        document.getElementById("buy-modal-policies").textContent = BRAND_CONFIG.shippingAndReturns;
+        document.getElementById("buy-modal-confirm-msg").classList.add("hidden");
+
+        const modal = document.getElementById("buy-modal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+
+      function closeBuyModal() {
+        const modal = document.getElementById("buy-modal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+
+      function setViewMode(mode) {
+        currentViewMode = mode;
+        const bioView = document.getElementById("view-link-in-bio");
+        const storeView = document.getElementById("view-store-widget");
+        const toggleBtn = document.getElementById("mode-toggle-btn");
+        const navBio = document.getElementById("nav-btn-bio");
+        const navWidget = document.getElementById("nav-btn-widget");
+
+        if (mode === "bio") {
+          bioView.classList.remove("hidden");
+          storeView.classList.add("hidden");
+          toggleBtn.textContent = "Ver Tienda & Burbuja →";
+          navBio.className = "hover:text-[#181715] transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5 border-b border-[#181715] text-[#181715]";
+          navWidget.className = "hover:text-[#181715] transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5";
+        } else {
+          bioView.classList.add("hidden");
+          storeView.classList.remove("hidden");
+          toggleBtn.textContent = "← Vista Link en Bio";
+          navWidget.className = "hover:text-[#181715] transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5 border-b border-[#181715] text-[#181715]";
+          navBio.className = "hover:text-[#181715] transition-colors whitespace-nowrap shrink-0 cursor-pointer pb-0.5";
+          isWidgetExpanded = true;
+          updateWidgetVisibility();
+        }
+      }
+
+      function updateWidgetVisibility() {
+        const win = document.getElementById("floating-widget-window");
+        if (isWidgetExpanded) {
+          win.classList.remove("hidden");
+          win.classList.add("flex");
+        } else {
+          win.classList.add("hidden");
+          win.classList.remove("flex");
+        }
+      }
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        renderDiagnosticPresets();
+        applyBrandConfigToDOM();
+
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("demo") === "true") {
+          document.getElementById("demo-config-panel").classList.remove("hidden");
+        }
+
+        document.getElementById("mode-toggle-btn").addEventListener("click", () => {
+          setViewMode(currentViewMode === "bio" ? "widget" : "bio");
+        });
+        document.getElementById("nav-btn-bio").addEventListener("click", () => setViewMode("bio"));
+        document.getElementById("nav-btn-widget").addEventListener("click", () => setViewMode("widget"));
+
+        const toggleDemoPanel = () => {
+          document.getElementById("demo-config-panel").classList.toggle("hidden");
+        };
+        document.getElementById("nav-btn-demo-config").addEventListener("click", toggleDemoPanel);
+        document.getElementById("bio-open-demo-btn").addEventListener("click", toggleDemoPanel);
+        document.getElementById("close-demo-panel-btn").addEventListener("click", () => {
+          document.getElementById("demo-config-panel").classList.add("hidden");
+        });
+
+        const stylePresetSelect = document.getElementById("input-style-preset");
+        if (stylePresetSelect) {
+          stylePresetSelect.addEventListener("change", (e) => {
+            const chosenId = e.target.value;
+            const preset = STYLE_PRESETS[chosenId];
+            if (preset) {
+              BRAND_CONFIG.stylePreset = chosenId;
+              BRAND_CONFIG.theme.bgPrimary = preset.theme.bgPrimary;
+              BRAND_CONFIG.theme.bgSecondary = preset.theme.bgSecondary;
+              BRAND_CONFIG.theme.textPrimary = preset.theme.textPrimary;
+              BRAND_CONFIG.theme.hairlineColor = preset.theme.hairlineColor;
+              BRAND_CONFIG.theme.accentColor = preset.theme.accentColor;
+              document.getElementById("input-accent-color").value = preset.theme.accentColor;
+              applyBrandConfigToDOM();
+            }
+          });
+        }
+
+        document.getElementById("brand-config-form").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const chosenId = document.getElementById("input-style-preset").value;
+          const preset = STYLE_PRESETS[chosenId] || STYLE_PRESETS.atelier;
+          BRAND_CONFIG.stylePreset = chosenId;
+          BRAND_CONFIG.brandName = document.getElementById("input-brand-name").value.trim() || BRAND_CONFIG.brandName;
+          BRAND_CONFIG.tagline = document.getElementById("input-brand-tagline").value.trim() || BRAND_CONFIG.tagline;
+          BRAND_CONFIG.theme.bgPrimary = preset.theme.bgPrimary;
+          BRAND_CONFIG.theme.bgSecondary = preset.theme.bgSecondary;
+          BRAND_CONFIG.theme.textPrimary = preset.theme.textPrimary;
+          BRAND_CONFIG.theme.hairlineColor = preset.theme.hairlineColor;
+
+          const customAccent = document.getElementById("input-accent-color").value.trim();
+          BRAND_CONFIG.theme.accentColor = customAccent || preset.theme.accentColor;
+          BRAND_CONFIG.shippingAndReturns = document.getElementById("input-shipping").value.trim() || BRAND_CONFIG.shippingAndReturns;
+          applyBrandConfigToDOM();
+        });
+
+        const fileInput = document.getElementById("bio-file-input");
+        document.getElementById("bio-attach-photo-btn").addEventListener("click", () => fileInput.click());
+        document.getElementById("widget-attach-photo-btn").addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", (e) => handleFileSelected(e.target.files[0]));
+
+        document.getElementById("bio-remove-image-btn").addEventListener("click", () => setPendingImage(null));
+        document.getElementById("widget-remove-image-btn").addEventListener("click", () => setPendingImage(null));
+
+        document.getElementById("bio-chat-form").addEventListener("submit", (e) => {
+          e.preventDefault();
+          sendAdvisorMessage(document.getElementById("bio-chat-input").value);
+        });
+
+        document.getElementById("widget-chat-form").addEventListener("submit", (e) => {
+          e.preventDefault();
+          sendAdvisorMessage(document.getElementById("widget-chat-input").value);
+        });
+
+        document.getElementById("minimize-widget-btn").addEventListener("click", () => {
+          isWidgetExpanded = false;
+          updateWidgetVisibility();
+        });
+        document.getElementById("floating-bubble-trigger").addEventListener("click", () => {
+          isWidgetExpanded = !isWidgetExpanded;
+          updateWidgetVisibility();
+        });
+
+        document.querySelectorAll(".store-cat-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            storeCategoryFilter = btn.getAttribute("data-cat") || "all";
+            document.querySelectorAll(".store-cat-btn").forEach((b) => {
+              b.className = "store-cat-btn px-4 py-2.5 text-[11px] uppercase tracking-widest font-medium text-[#5A534A] hover:text-[#181715] rounded-none cursor-pointer whitespace-nowrap shrink-0";
+            });
+            btn.className = "store-cat-btn px-4 py-2.5 text-[11px] uppercase tracking-widest font-medium bg-[#181715] text-[#F7F5F0] rounded-none cursor-pointer whitespace-nowrap shrink-0";
+            renderStoreCatalog();
+          });
+        });
+
+        document.getElementById("close-buy-modal-btn").addEventListener("click", closeBuyModal);
+        document.getElementById("cancel-buy-modal-btn").addEventListener("click", closeBuyModal);
+        document.getElementById("confirm-direct-buy-btn").addEventListener("click", () => {
+          document.getElementById("buy-modal-confirm-msg").classList.remove("hidden");
+          if (currentProduct && currentProduct.buyUrl) {
+            setTimeout(() => {
+              window.open(currentProduct.buyUrl, "_blank");
+            }, 600);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
