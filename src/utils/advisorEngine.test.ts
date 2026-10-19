@@ -10,6 +10,7 @@ import {
   formatGeminiHistory,
   cleanAssistantTurnText,
   EL_YEITE_KNOWLEDGE_BASE,
+  extractJsonObject,
 } from './advisorEngine.ts';
 
 test('BRAND_CONFIG contains exactly 6 furniture products with real photography URLs, theme, quickPrompts, and shippingAndReturns', () => {
@@ -233,4 +234,39 @@ test('buildAdvisorSystemInstruction integrates EL_YEITE_KNOWLEDGE_BASE with fabr
   assert.ok(instruction.includes('15 a 25 días'));
   assert.ok(instruction.includes('6 cuotas sin interés'));
 });
+
+test('extractJsonObject parses markdown-wrapped JSON and handles trailing commas and comments', () => {
+  const markdownWrapped = '```json\n{\n  "advisorMessage": "Respuesta en markdown",\n  "recommendedProducts": [],\n}\n```';
+  const parsed = extractJsonObject(markdownWrapped);
+  assert.ok(parsed);
+  assert.equal(parsed.advisorMessage, 'Respuesta en markdown');
+  assert.deepEqual(parsed.recommendedProducts, []);
+
+  const textWithPreamble = 'Hola! Acá está el JSON:\n{"advisorMessage": "Hola", "recommendedProducts": []}\nEspero te sirva!';
+  const parsedPreamble = extractJsonObject(textWithPreamble);
+  assert.ok(parsedPreamble);
+  assert.equal(parsedPreamble.advisorMessage, 'Hola');
+});
+
+test('generateDeterministicAdvisorResponse classifies kitchen with 4 meters as Cocina/Comedor Amplio and not greeting', () => {
+  const query = 'tengo una cocina con un espacio de 4 metros que me recomendas';
+  const response = generateDeterministicAdvisorResponse(query, DEFAULT_BRAND_CONFIG, false);
+
+  assert.ok(!response.advisorMessage.startsWith('¡Hola! Qué bueno saludarte'));
+  assert.ok(response.advisorMessage.includes('Mesa de Comedor Petiribí Macizo'));
+  assert.ok(response.advisorMessage.includes('Sillas Tapizadas en Pana Antimanchas'));
+  assert.ok(response.advisorMessage.includes('2 metros libres') || response.advisorMessage.includes('circulación'));
+  assert.equal(response.recommendedProducts[0].id, 'EY-MESA-COMEDOR');
+  assert.equal(response.recommendedProducts[1].id, 'EY-SILLA-PANA');
+});
+
+test('Strict greeting test: pure greeting triggers greeting, but query with environment/measurements does not', () => {
+  const pureGreeting = generateDeterministicAdvisorResponse('hola', DEFAULT_BRAND_CONFIG, false);
+  assert.ok(pureGreeting.advisorMessage.startsWith('¡Hola! Qué bueno saludarte'));
+
+  const greetingWithKitchen = generateDeterministicAdvisorResponse('hola tengo cocina de 4 metros', DEFAULT_BRAND_CONFIG, false);
+  assert.ok(!greetingWithKitchen.advisorMessage.startsWith('¡Hola! Qué bueno saludarte'));
+  assert.equal(greetingWithKitchen.recommendedProducts[0].id, 'EY-MESA-COMEDOR');
+});
+
 

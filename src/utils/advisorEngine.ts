@@ -101,41 +101,40 @@ export interface ChatHistoryTurn {
   text: string;
 }
 
-export function cleanAndParseJson(raw: string): any {
+export function extractJsonObject(raw: string): any {
   if (!raw || typeof raw !== 'string') return null;
-  let cleaned = raw.trim();
-  if (cleaned.startsWith('```')) {
-    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  const startIdx = raw.indexOf('{');
+  const endIdx = raw.lastIndexOf('}');
+  if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
+    return null;
   }
+  let jsonString = raw.slice(startIdx, endIdx + 1).trim();
+
   try {
-    return JSON.parse(cleaned);
+    return JSON.parse(jsonString);
   } catch (_e) {
-    const strippedComments = cleaned.replace(/\/\/.*$/gm, '');
+    const strippedComments = jsonString.replace(/\/\/.*$/gm, '');
     try {
       return JSON.parse(strippedComments);
     } catch (_e2) {
-      const match = strippedComments.match(/\{[\s\S]*\}/);
-      if (match) {
-        try {
-          return JSON.parse(match[0]);
-        } catch (_e3) {
-          const fixedCommas = match[0].replace(/,\s*([\]}])/g, '$1');
-          try {
-            return JSON.parse(fixedCommas);
-          } catch (_e4) {
-            return null;
-          }
-        }
+      const fixedCommas = strippedComments.replace(/,\s*([\]}])/g, '$1');
+      try {
+        return JSON.parse(fixedCommas);
+      } catch (_e3) {
+        return null;
       }
     }
   }
-  return null;
+}
+
+export function cleanAndParseJson(raw: string): any {
+  return extractJsonObject(raw);
 }
 
 export function cleanAssistantTurnText(rawText: string): string {
   if (!rawText) return '';
   const trimmed = rawText.trim();
-  const parsed = cleanAndParseJson(trimmed);
+  const parsed = extractJsonObject(trimmed);
   if (parsed && typeof parsed === 'object') {
     const msg = typeof parsed.advisorMessage === 'string' ? parsed.advisorMessage.trim() : '';
     const q = typeof parsed.closingQuestion === 'string' ? parsed.closingQuestion.trim() : '';
@@ -354,7 +353,10 @@ export const EL_YEITE_KNOWLEDGE_BASE = `# BASE DE CONOCIMIENTO OFICIAL DEL TALLE
 6. **Regla de Recomendación de Productos en recommendedProducts:**
    - \`recommendedProducts\` debe incluir ÚNICAMENTE productos relevantes de \`BRAND_CONFIG.products\` si la consulta lo amerita (0, 1 o 2 productos).
    - Si el usuario solo saluda, agradece, pregunta exclusivamente sobre cómo limpiar café, formas de pago, envíos o si hacemos a medida sin pedir ver un mueble concreto, devolvé \`recommendedProducts: []\` (array vacío) respondiendo a su pregunta en \`advisorMessage\`.
-   - Si pregunta por un mueble específico o pide recomendación para su espacio, devolvé el o los muebles exactos (1 o 2 productos).`;
+   - Si pregunta por un mueble específico o pide recomendación para su espacio, devolvé el o los muebles exactos (1 o 2 productos).
+
+7. **Espacios de Cocina, Comedor y Grandes Ambientes (3 a 4 metros):**
+   - Para cocinas, cocinas-comedor o espacios amplios de 3 a 4 metros, la combinación principal por excelencia es la **Mesa de Comedor Petiribí Macizo** (200x100 cm, con estructura de ensamble artesanal y lustre poliuretánico mate altamente resistente a líquidos, calor y uso diario) acompañada de las **Sillas Tapizadas en Pana Antimanchas** (con género teflonado que repele manchas de comida y líquidos, limpiándose fácilmente con un paño húmedo). En un espacio de 4 metros, esta mesa de 2 metros se luce como pieza central imponente dejando casi 2 metros libres para circulación muy cómoda.`;
 
 export function buildAdvisorSystemInstruction(brandConfig: BrandConfig): string {
   const catalogJson = JSON.stringify(
@@ -377,7 +379,7 @@ export function buildAdvisorSystemInstruction(brandConfig: BrandConfig): string 
   );
 
   return `# ROL Y OBJETIVO
-Actuás como el Asesor de Compras Oficial y Diseñador de Interiores de la mueblería artesanal ${brandConfig.brandName}. Atendés consultas con criterio profesional de arquitecto e interiorista, analizás fotos de ambientes (living, comedor, rincones) y recomendás con precisión las piezas del catálogo oficial de El Yeite, asesorando con soltura sobre medidas a medida, telas antimanchas, maderas nobles y formas de pago.
+Actuás como el Asesor de Compras Oficial y Diseñador de Interiores de la mueblería artesanal ${brandConfig.brandName}. Atendés consultas con criterio profesional de arquitecto e interiorista, analizás fotos de ambientes (living, comedor, cocina, rincones) y recomendás con precisión las piezas del catálogo oficial de El Yeite, asesorando con soltura sobre medidas a medida, telas antimanchas, maderas nobles y formas de pago.
 
 # CATÁLOGO OFICIAL (BRAND_CONFIG)
 \`\`\`json
@@ -394,7 +396,7 @@ ${EL_YEITE_KNOWLEDGE_BASE}
 3. **Tono y Cierre Comercial:** Hablá en español rioplatense (voseo natural, cercano y profesional). Cerrá siempre tu respuesta con una pregunta corta en \`closingQuestion\` que invite a avanzar con la decisión de diseño o compra.
 
 # FORMATO DE SALIDA (JSON ESTRUCTURADO)
-Respondé SIEMPRE devolviendo únicamente un objeto JSON válido (sin comentarios de código ni texto adicional fuera del JSON):
+Respondé SIEMPRE devolviendo ÚNICAMENTE un objeto JSON puro válido (sin bloques de código markdown como \`\`\`json ni texto adicional antes o después del JSON):
 {
   "visualAnalysis": "Breve diagnóstico si envió foto; si solo envió texto, estrictamente null.",
   "advisorMessage": "Tu respuesta experta y conversacional como interiorista de El Yeite.",
@@ -433,11 +435,11 @@ export function matchCatalogProducts(
       'rincon', 'rincón', 'lectura', 'esquina', 'sure', 'boucle', 'bouclé', 'lino', 'relax', 'descanso',
     ],
     mesas: [
-      'mesa', 'mesas', 'ratona', 'comedor', 'madera', 'petiribí', 'petiribi', 'comensales', 'tapa',
+      'mesa', 'mesas', 'ratona', 'comedor', 'cocina', 'madera', 'petiribí', 'petiribi', 'comensales', 'tapa',
       'almuerzo', 'cena', 'bloque', 'centro',
     ],
     sillas: [
-      'silla', 'sillas', 'pana', 'asiento', 'respaldo', 'comedor', 'tapizada', 'tapizadas',
+      'silla', 'sillas', 'cocina', 'pana', 'asiento', 'respaldo', 'comedor', 'tapizada', 'tapizadas',
     ],
     espacio: [
       'espacio', 'ambiente', 'casa', 'departamento', 'mueble', 'muebles', 'deco', 'decoración',
@@ -479,19 +481,19 @@ export function matchCatalogProducts(
       score += 6;
     }
 
+    if ((combined.includes('cocina') || combined.includes('comedor') || combined.includes('4 metros') || combined.includes('3 metros') || combined.includes('8 comensales') || combined.includes('200')) && product.id === 'EY-MESA-COMEDOR') {
+      score += 15;
+    }
+    if ((combined.includes('cocina') || combined.includes('silla') || combined.includes('sillas') || combined.includes('pana')) && product.id === 'EY-SILLA-PANA') {
+      score += 12;
+    }
     if ((combined.includes('sure') || combined.includes('1.30') || combined.includes('rincon') || combined.includes('rincón')) && product.id === 'EY-SURE') {
       score += 10;
     }
     if ((combined.includes('familiar') || combined.includes('chicos') || combined.includes('mascotas') || combined.includes('3 cuerpos')) && product.id === 'EY-SOFA-3C') {
       score += 10;
     }
-    if ((combined.includes('comedor') || combined.includes('8 comensales') || combined.includes('200')) && product.id === 'EY-MESA-COMEDOR') {
-      score += 10;
-    }
     if ((combined.includes('ratona') || combined.includes('centro') || combined.includes('baja')) && product.id === 'EY-MESA-RATONA') {
-      score += 10;
-    }
-    if ((combined.includes('silla') || combined.includes('sillas') || combined.includes('pana')) && product.id === 'EY-SILLA-PANA') {
       score += 10;
     }
     if ((combined.includes('boucle') || combined.includes('bouclé') || combined.includes('poltrona') || combined.includes('dormitorio') || combined.includes('estudio')) && product.id === 'EY-POLTRONA-BOUCLE') {
@@ -711,36 +713,85 @@ export function generateDeterministicAdvisorResponse(
   ];
   const isForeignProduct = foreignKeywords.some((w) => textAll.includes(w));
 
-  // 2. Greeting / Open consultation
-  const greetingWords = [
-    'hola', 'buenas', 'buen dia', 'buen día', 'buenas tardes', 'buenas noches',
-    'que tal', 'qué tal', 'hola buenas', 'hola buenas tardes', 'hola buen dia', 'hola!'
-  ];
-  const isGreetingWord =
-    greetingWords.includes(cleanQuery) ||
-    cleanQuery.startsWith('hola ') ||
-    cleanQuery.startsWith('buenas ') ||
-    cleanQuery === 'hola' ||
-    cleanQuery === 'buenas';
+  // Mentions of space, environment, furniture or measurements
+  const hasAmbiente =
+    textAll.includes('cocina') ||
+    textAll.includes('comedor') ||
+    textAll.includes('living') ||
+    textAll.includes('dormitorio') ||
+    textAll.includes('estudio') ||
+    textAll.includes('rincon') ||
+    textAll.includes('rincón') ||
+    textAll.includes('espacio') ||
+    textAll.includes('ambiente') ||
+    textAll.includes('casa') ||
+    textAll.includes('departamento') ||
+    textAll.includes('depto');
 
-  const isOpenConsultation =
-    cleanQuery === 'info' ||
-    cleanQuery === 'informacion' ||
-    cleanQuery === 'información' ||
-    cleanQuery.includes('tenes stock') ||
-    cleanQuery.includes('tenés stock') ||
-    cleanQuery.includes('que me recomendas') ||
-    cleanQuery.includes('qué me recomendás') ||
-    cleanQuery.includes('que tenes') ||
-    cleanQuery.includes('qué tenés') ||
-    cleanQuery.includes('que tienen') ||
-    cleanQuery.includes('qué tienen') ||
-    cleanQuery.includes('asesor') ||
-    cleanQuery.includes('ayuda') ||
-    cleanQuery.includes('consulta');
+  const hasMueble =
+    textAll.includes('mesa') ||
+    textAll.includes('silla') ||
+    textAll.includes('sillon') ||
+    textAll.includes('sillón') ||
+    textAll.includes('sofa') ||
+    textAll.includes('sofá') ||
+    textAll.includes('poltrona') ||
+    textAll.includes('bloque') ||
+    textAll.includes('ratona') ||
+    textAll.includes('mueble') ||
+    textAll.includes('muebles') ||
+    textAll.includes('tapizado') ||
+    textAll.includes('tapiceria') ||
+    textAll.includes('tapicería') ||
+    textAll.includes('tela') ||
+    textAll.includes('pana') ||
+    textAll.includes('lino') ||
+    textAll.includes('boucle') ||
+    textAll.includes('bouclé');
 
-  // 3. Compact space / Rincón / Medidas compactas (1.20, 1.30, 1.40, rincón, lectura, chico, individual, dormitorio)
-  const isEspacioChico =
+  const hasMedida =
+    /\b\d+(\.\d+)?\s*(m|metro|metros|cm)\b/i.test(textAll) ||
+    textAll.includes('metro') ||
+    textAll.includes('metros') ||
+    textAll.includes('chico') ||
+    textAll.includes('chica') ||
+    textAll.includes('grande') ||
+    textAll.includes('amplio') ||
+    textAll.includes('amplia') ||
+    textAll.includes('medida') ||
+    textAll.includes('medidas');
+
+  // GREETING STRICT RULE:
+  // Must be < 25 characters AND pure greeting AND no mention of environment, furniture, or measurements!
+  const GREETING_REGEX = /^(hola|buenas|buen dia|buen día|buenas tardes|buenas noches|que tal|qué tal|hey)[\s!?.]*$/i;
+  const isPureGreeting =
+    cleanQuery.length < 25 &&
+    GREETING_REGEX.test(cleanQuery) &&
+    !hasAmbiente &&
+    !hasMueble &&
+    !hasMedida;
+
+  // 2. Cocina / Comedor / Espacios Amplios / 3 o 4 metros
+  const isCocinaOComedorAmplio =
+    textAll.includes('cocina') ||
+    textAll.includes('comedor') ||
+    textAll.includes('4 metro') ||
+    textAll.includes('4 metros') ||
+    textAll.includes('4m') ||
+    textAll.includes('4 m') ||
+    textAll.includes('3 metro') ||
+    textAll.includes('3 metros') ||
+    textAll.includes('3m') ||
+    textAll.includes('3 m') ||
+    (textAll.includes('amplio') && (textAll.includes('espacio') || textAll.includes('ambiente')));
+
+  // 3. Medidas chicas (1m a 1.80m o rincón / compacto / Sillón Sure)
+  const isMedidaChica =
+    textAll.includes('sure') ||
+    textAll.includes('1 metro') ||
+    textAll.includes('1 metros') ||
+    textAll.includes('1m') ||
+    textAll.includes('1 m') ||
     textAll.includes('1.20') ||
     textAll.includes('1.2') ||
     textAll.includes('1.30') ||
@@ -748,9 +799,15 @@ export function generateDeterministicAdvisorResponse(
     textAll.includes('1.40') ||
     textAll.includes('1.4') ||
     textAll.includes('1.50') ||
+    textAll.includes('1.5') ||
+    textAll.includes('1.60') ||
+    textAll.includes('1.6') ||
+    textAll.includes('1.70') ||
+    textAll.includes('1.7') ||
+    textAll.includes('1.80') ||
+    textAll.includes('1.8') ||
     textAll.includes('rincon') ||
     textAll.includes('rincón') ||
-    textAll.includes('lectura') ||
     textAll.includes('chico') ||
     textAll.includes('chica') ||
     textAll.includes('pequeño') ||
@@ -758,13 +815,27 @@ export function generateDeterministicAdvisorResponse(
     textAll.includes('compacto') ||
     textAll.includes('compacta') ||
     textAll.includes('individual') ||
-    textAll.includes('dormitorio') ||
-    textAll.includes('estudio') ||
-    textAll.includes('sure') ||
-    textAll.includes('medida') ||
-    textAll.includes('medidas');
+    textAll.includes('lectura');
 
-  // 4. Telas / Manchas / Mascotas / Chicos / Limpieza / Derrames
+  // 4. Living grande o convivencia familiar / mascotas
+  const isLivingGrandeOFamilia =
+    textAll.includes('living grande') ||
+    textAll.includes('living amplio') ||
+    textAll.includes('familia') ||
+    textAll.includes('familiar') ||
+    textAll.includes('hijos') ||
+    textAll.includes('chicos') ||
+    textAll.includes('niños') ||
+    textAll.includes('mascota') ||
+    textAll.includes('mascotas') ||
+    textAll.includes('perro') ||
+    textAll.includes('perros') ||
+    textAll.includes('gato') ||
+    textAll.includes('gatos') ||
+    textAll.includes('3 cuerpos') ||
+    textAll.includes('tres cuerpos');
+
+  // 5. Limpieza de derrames / café / mate / vino
   const isLimpiezaDerrame =
     textAll.includes('cafe') ||
     textAll.includes('café') ||
@@ -778,45 +849,7 @@ export function generateDeterministicAdvisorResponse(
     textAll.includes('como se limpia') ||
     textAll.includes('cómo se limpia');
 
-  const isTelas =
-    isLimpiezaDerrame ||
-    textAll.includes('mancha') ||
-    textAll.includes('manchas') ||
-    textAll.includes('manche') ||
-    textAll.includes('manchen') ||
-    textAll.includes('ensucie') ||
-    textAll.includes('ensucien') ||
-    textAll.includes('antimancha') ||
-    textAll.includes('antimanchas') ||
-    textAll.includes('limpiar') ||
-    textAll.includes('limpieza') ||
-    textAll.includes('perro') ||
-    textAll.includes('perros') ||
-    textAll.includes('gato') ||
-    textAll.includes('gatos') ||
-    textAll.includes('mascota') ||
-    textAll.includes('mascotas') ||
-    textAll.includes('chico') ||
-    textAll.includes('chicos') ||
-    textAll.includes('niño') ||
-    textAll.includes('niños') ||
-    textAll.includes('tela') ||
-    textAll.includes('telas') ||
-    textAll.includes('pana') ||
-    textAll.includes('lino') ||
-    textAll.includes('caluroso') ||
-    textAll.includes('fresco') ||
-    textAll.includes('lavar') ||
-    textAll.includes('funda') ||
-    textAll.includes('fundas') ||
-    textAll.includes('desmontable') ||
-    textAll.includes('desmontables') ||
-    textAll.includes('tapizado') ||
-    textAll.includes('tapizados') ||
-    textAll.includes('genero') ||
-    textAll.includes('género');
-
-  // 5. Comedor / Mesas / Sillas
+  // 6. Mesa Ratona
   const isMesaRatona =
     textAll.includes('ratona') ||
     textAll.includes('mesa baja') ||
@@ -825,17 +858,7 @@ export function generateDeterministicAdvisorResponse(
     textAll.includes('bloque') ||
     textAll.includes('120x60');
 
-  const isComedor =
-    textAll.includes('mesa') ||
-    textAll.includes('mesas') ||
-    textAll.includes('comedor') ||
-    textAll.includes('silla') ||
-    textAll.includes('sillas') ||
-    textAll.includes('petiribi') ||
-    textAll.includes('petiribí') ||
-    textAll.includes('comensales');
-
-  // 6. Envíos / Cuotas / Precios / Tiempos / Descuentos
+  // 7. Envíos / Cuotas / Precios / Tiempos / Descuentos
   const isEnviosOCuotas =
     textAll.includes('envio') ||
     textAll.includes('envíos') ||
@@ -865,6 +888,19 @@ export function generateDeterministicAdvisorResponse(
     textAll.includes('efectivo') ||
     textAll.includes('transferencia');
 
+  // 8. Telas generales
+  const isTelas =
+    textAll.includes('tela') ||
+    textAll.includes('telas') ||
+    textAll.includes('antimancha') ||
+    textAll.includes('antimanchas') ||
+    textAll.includes('pana') ||
+    textAll.includes('lino') ||
+    textAll.includes('boucle') ||
+    textAll.includes('bouclé') ||
+    textAll.includes('desmontable') ||
+    textAll.includes('desmontables');
+
   let selected: BrandProduct[] = [];
   let advisorMessage = '';
   let closingQuestion = '';
@@ -874,8 +910,8 @@ export function generateDeterministicAdvisorResponse(
     selected = [getProduct('EY-SURE'), getProduct('EY-SOFA-3C')];
     advisorMessage = `Te soy 100% honesto: en ${brandConfig.brandName} nos especializamos exclusivamente en muebles de autor y tapicería a medida en maderas nobles. Te seleccioné las piezas oficiales más afines a tu búsqueda para que veas sus especificaciones.`;
     closingQuestion = '¿Buscás equipar algún ambiente en particular como living, comedor o rincón de lectura?';
-  } else if ((isGreetingWord || isOpenConsultation || query.trim().length === 0) && !isEspacioChico && !isTelas && !isComedor && !isMesaRatona && !isEnviosOCuotas) {
-    // 1. SALUDO O CONSULTA ABIERTA
+  } else if (isPureGreeting) {
+    // 1. SALUDO EXCLUSIVO (< 25 caracteres sin ambientes ni medidas)
     selected = [getProduct('EY-SURE'), getProduct('EY-SOFA-3C')];
     advisorMessage =
       '¡Hola! Qué bueno saludarte. Soy el asesor de EL YEITE · Taller de Muebles. Contame qué espacio estás armando (qué medidas tenés disponibles o si buscás tela antimanchas) o subí una foto de tu ambiente y te recomiendo el modelo ideal. Mirá, estas son dos de nuestras piezas más buscadas hoy:';
@@ -887,36 +923,33 @@ export function generateDeterministicAdvisorResponse(
       'Para limpiar café, mate o cualquier derrame en nuestras telas antimanchas o Petiribí: absorbé de inmediato con servilleta o paño de microfibra limpio sin frotar. Luego pasá un paño apenas humedecido con agua y jabón neutro. En cuanto al Petiribí macizo, su lustre poliuretánico mate sella los poros y resiste derrames y calor sin mancharse.';
     closingQuestion =
       '¿Querés saber más sobre nuestros tapizados desmontables lavables o te gustaría consultar por algún modelo?';
-  } else if (isEspacioChico) {
-    // 3. ESPACIO CHICO / RINCÓN / MEDIDAS COMPACTAS
-    selected = [getProduct('EY-SURE'), getProduct('EY-POLTRONA-BOUCLE')];
-    if (isTelas) {
-      advisorMessage =
-        'Para un espacio de 1.20m a 1.40m que requiera telas resistentes, te recomiendo el Sillón Sure y la Poltrona Individual Bouclé Crudo: por sus 78 cm de ancho entran perfecto sin recargar visualmente el paso, y vienen con géneros de alto tránsito con tratamiento antimanchas fresco y fácil de limpiar.';
-      closingQuestion = '¿Querés chequear las medidas exactas de tu rincón para validar que entre con holgura o preferís ver opciones de tapizado?';
-    } else {
-      advisorMessage =
-        'Para ese rincón o espacio compacto, te recomiendo el Sillón Sure y la Poltrona Individual Bouclé Crudo: por sus 78 cm de ancho entran perfecto en espacios de 1.20m a 1.40m sin recargar visualmente el paso, y vienen con tela antimanchas fresca y estructura en madera maciza.';
-      closingQuestion = '¿Querés chequear las medidas exactas de tu rincón para validar que entre con holgura o preferís ver opciones de tapizado?';
-    }
-  } else if (isTelas) {
-    // 4. TELAS / MANCHAS / MASCOTAS / CHICOS / LIMPIEZA
-    selected = [getProduct('EY-SURE'), getProduct('EY-SOFA-3C')];
+  } else if (isCocinaOComedorAmplio) {
+    // 3. COCINA / COMEDOR / 4 METROS / 3 METROS / ESPACIOS AMPLIOS
+    selected = [getProduct('EY-MESA-COMEDOR'), getProduct('EY-SILLA-PANA')];
     advisorMessage =
-      'Todos los tapizados de EL YEITE cuentan con proceso antimanchas repele-líquidos de fácil limpieza en seco. Para uso diario intensivo, chicos o mascotas, te recomiendo el Sillón Sure y el Sofá de 3 Cuerpos Lino Antimanchas, que además cuenta con fundas completamente desmontables y lavables en lavarropas.';
-    closingQuestion = '¿Te gustaría que te enviemos el muestrario digital de géneros antimanchas y tonos disponibles?';
+      'Para una cocina-comedor o espacio amplio de 4 metros sobra lugar para armar un sector principal imponente con la Mesa de Comedor Petiribí Macizo (200x100 cm, con lustre poliuretánico resistente a líquidos y calor) acompañada de las Sillas Tapizadas en Pana Antimanchas (ideales para cocina porque repelen manchas de comida y líquidos y se limpian con un paño húmedo), dejando casi 2 metros libres para circulación cómoda.';
+    closingQuestion =
+      '¿Cuántos comensales solés recibir habitualmente o te gustaría consultar por una medida personalizada de la mesa?';
+  } else if (isLivingGrandeOFamilia) {
+    // 4. LIVING GRANDE / FAMILIA / MASCOTAS
+    selected = [getProduct('EY-SOFA-3C'), getProduct('EY-MESA-RATONA')];
+    advisorMessage =
+      'Para un living amplio o de convivencia familiar con niños o mascotas, te recomiendo el Sofá de 3 Cuerpos Lino Antimanchas junto a la Mesa Ratona Bloque Petiribí: el sofá cuenta con placas soft de alta densidad y fundas 100% desmontables y lavables, mientras que la mesa ratona en madera maciza resiste el uso diario aportando calidez y funcionalidad al centro del ambiente.';
+    closingQuestion =
+      '¿Te gustaría conocer las opciones de tonos para las fundas o consultar por medidas especiales de sofá?';
+  } else if (isMedidaChica) {
+    // 5. MEDIDAS CHICAS (1M A 1.80M O RINCÓN)
+    selected = [getProduct('EY-SURE'), getProduct('EY-POLTRONA-BOUCLE')];
+    advisorMessage =
+      'Para ese rincón o espacio compacto de 1m a 1.80m, te recomiendo el Sillón Sure y la Poltrona Individual Bouclé: por sus 78 cm de ancho entran con total comodidad sin recargar visualmente el paso, y vienen con estructura en madera noble y géneros de alto tránsito con tratamiento antimanchas fresco y fácil de limpiar.';
+    closingQuestion =
+      '¿Querés chequear las medidas exactas de tu rincón para validar que entre con holgura o preferís ver opciones de tapizado?';
   } else if (isMesaRatona) {
-    // 5. MESA RATONA
+    // 6. MESA RATONA
     selected = [getProduct('EY-MESA-RATONA'), getProduct('EY-SURE')];
     advisorMessage =
       'Nuestra Mesa Ratona Bloque en Petiribí Macizo de 120x60 cm tiene 40 cm de altura, la proporción justa para articular el centro de tu living junto a un sillón o sofá.';
     closingQuestion = '¿Te gustaría saber las terminaciones en aceite mate o ver opciones de entrega inmediata?';
-  } else if (isComedor) {
-    // 6. COMEDOR / MESAS / SILLAS
-    selected = [getProduct('EY-MESA-COMEDOR'), getProduct('EY-SILLA-PANA')];
-    advisorMessage =
-      'Para armar tu comedor, te recomiendo la Mesa de Comedor Petiribí Macizo (200x100 cm para 8 comensales) junto a las Sillas Tapizadas en Pana Antimanchas, que combinan estructura reforzada en petiribí con tapizado de alta resistencia al uso diario.';
-    closingQuestion = '¿Cuántos comensales solés recibir habitualmente para ajustar la medida o cantidad de sillas?';
   } else if (isEnviosOCuotas) {
     // 7. ENVÍOS / CUOTAS / PRECIOS / TIEMPOS / DESCUENTOS
     if (textAll.includes('efectivo') || textAll.includes('transferencia') || textAll.includes('descuento')) {
@@ -931,8 +964,14 @@ export function generateDeterministicAdvisorResponse(
         'En EL YEITE realizamos envíos asegurados a todo el país y contamos con hasta 6 cuotas sin interés con todas las tarjetas bancarias (o 15% de descuento por transferencia directa o efectivo). Todos nuestros muebles son de fabricación artesanal en maderas nobles con garantía de taller.';
       closingQuestion = '¿A qué localidad necesitarías el envío o sobre qué modelo te gustaría consultar disponibilidad?';
     }
+  } else if (isTelas) {
+    // 8. TELAS / ANTIMANCHAS
+    selected = [getProduct('EY-SURE'), getProduct('EY-SOFA-3C')];
+    advisorMessage =
+      'Todos los tapizados de EL YEITE cuentan con proceso antimanchas repele-líquidos de fácil limpieza en seco. Para uso diario intensivo, chicos o mascotas, te recomiendo el Sillón Sure y el Sofá de 3 Cuerpos Lino Antimanchas, que además cuenta con fundas completamente desmontables y lavables en lavarropas.';
+    closingQuestion = '¿Te gustaría que te enviemos el muestrario digital de géneros antimanchas y tonos disponibles?';
   } else {
-    // Fallback general de mobiliario
+    // 9. CONSULTA GENERAL
     selected = [getProduct('EY-SURE'), getProduct('EY-SOFA-3C')];
     advisorMessage =
       `Para equipar tu ambiente con calidez y diseño artesanal en ${brandConfig.brandName}, estas son dos de nuestras piezas principales fabricadas en maderas nobles y tapicería a medida:`;
@@ -943,11 +982,11 @@ export function generateDeterministicAdvisorResponse(
   if (hasImage) {
     if (visualClues && visualClues.trim().length > 0) {
       visualAnalysis = visualClues.trim();
-    } else if (isComedor || textAll.includes('comedor')) {
-      visualAnalysis = 'Observo un área de comedor con buena luz que pide la calidez de la Mesa en Petiribí macizo de 200cm junto a sillas tapizadas.';
-    } else if (isEspacioChico) {
+    } else if (isCocinaOComedorAmplio || textAll.includes('cocina') || textAll.includes('comedor')) {
+      visualAnalysis = 'Observo un espacio amplio y luminoso de tipo cocina-comedor que pide la presencia imponente de la Mesa en Petiribí macizo de 200cm junto a sillas tapizadas.';
+    } else if (isMedidaChica) {
       visualAnalysis = 'Veo en tu foto un ambiente con espacio libre de ~1.30m que pide la presencia del Sillón Sure o una Poltrona Bouclé.';
-    } else if (textAll.includes('familiar') || textAll.includes('chicos') || textAll.includes('mascotas')) {
+    } else if (isLivingGrandeOFamilia || textAll.includes('familiar') || textAll.includes('chicos') || textAll.includes('mascotas')) {
       visualAnalysis = 'Detecto un living familiar amplio de alto tránsito donde el Sofá de 3 Cuerpos con fundas lavables y género antimanchas resuelve confort y durabilidad.';
     } else {
       visualAnalysis = 'Veo en tu foto un ambiente con luz tenue y rincón disponible que pide la presencia de muebles en maderas nobles.';

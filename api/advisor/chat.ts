@@ -7,6 +7,7 @@ import {
   formatGeminiHistory,
   cleanAssistantTurnText,
   cleanAndParseJson,
+  extractJsonObject,
 } from '../../src/utils/advisorEngine.ts';
 import type { BrandConfig, ChatHistoryTurn } from '../../src/utils/advisorEngine.ts';
 
@@ -219,22 +220,24 @@ export default async function handler(req: any, res: any) {
 
         const response = await Promise.race([apiPromise, timeoutPromise]);
         if (response && response.text) {
-          const parsed = JSON.parse(response.text);
-          const structured = sanitizeAdvisorResponse(parsed, activeBrandConfig, {
-            hasImage,
-            userQuery: promptText,
-            visualClues: body.visualClues,
-          });
+          const parsed = extractJsonObject(response.text);
+          if (parsed && typeof parsed === 'object') {
+            const structured = sanitizeAdvisorResponse(parsed, activeBrandConfig, {
+              hasImage,
+              userQuery: promptText,
+              visualClues: body.visualClues,
+            });
 
-          res.status(200).json({
-            structured,
-            meta: {
-              source: 'gemini-live',
-              modelUsed: modelToTry,
-              latencyMs: Date.now() - startTime,
-            },
-          });
-          return;
+            res.status(200).json({
+              structured,
+              meta: {
+                source: 'gemini-live',
+                modelUsed: modelToTry,
+                latencyMs: Date.now() - startTime,
+              },
+            });
+            return;
+          }
         }
       } catch (err: any) {
         console.error(`Error en Gemini API (${modelToTry}):`, err?.message || err);
@@ -274,6 +277,7 @@ export default async function handler(req: any, res: any) {
     const controller = new AbortController();
     const pollTimeout = setTimeout(() => controller.abort(), 25000);
 
+    const pollSeed = Math.floor(Math.random() * 1000000);
     const pollRes = await fetch('https://text.pollinations.ai/openai', {
       method: 'POST',
       headers: {
@@ -283,6 +287,7 @@ export default async function handler(req: any, res: any) {
       },
       body: JSON.stringify({
         model: 'openai',
+        seed: pollSeed,
         response_format: { type: 'json_object' },
         messages: openAiMessages,
       }),
@@ -294,7 +299,7 @@ export default async function handler(req: any, res: any) {
       const pollData = (await pollRes.json()) as any;
       const rawContent = pollData?.choices?.[0]?.message?.content;
       if (rawContent && typeof rawContent === 'string') {
-        const parsedJson = cleanAndParseJson(rawContent);
+        const parsedJson = extractJsonObject(rawContent);
 
         if (parsedJson && typeof parsedJson === 'object') {
           const structured = sanitizeAdvisorResponse(parsedJson, activeBrandConfig, {
