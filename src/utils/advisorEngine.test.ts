@@ -170,3 +170,24 @@ test('formatGeminiHistory enforces role alternation, discards leading model turn
   assert.equal(formatted3[0].role, 'user');
   assert.equal(formatted3[1].role, 'model');
 });
+
+test('generateDeterministicAdvisorResponse classifies hola as warm greeting and does not claim out-of-catalog', () => {
+  const greeting = generateDeterministicAdvisorResponse('hola', DEFAULT_BRAND_CONFIG, false);
+  assert.equal(greeting.visualAnalysis, null);
+  assert.ok(greeting.advisorMessage.includes('¡Hola! Qué bueno saludarte'));
+  assert.ok(!greeting.advisorMessage.includes('Te soy 100% honesto'));
+  assert.equal(greeting.recommendedProducts[0].id, 'EY-SURE');
+  assert.equal(greeting.recommendedProducts[1].id, 'EY-SOFA-3C');
+});
+
+test('generateDeterministicAdvisorResponse handles compact space with stain-resistant intent (1.30m)', () => {
+  const compact = generateDeterministicAdvisorResponse(
+    'tengo un espacio de 1.30m y quiero algo que no se manche',
+    DEFAULT_BRAND_CONFIG,
+    false
+  );
+  assert.ok(compact.advisorMessage.includes('78 cm de ancho'));
+  assert.ok(compact.advisorMessage.includes('antimanchas'));
+  assert.equal(compact.recommendedProducts[0].id, 'EY-SURE');
+  assert.equal(compact.recommendedProducts[1].id, 'EY-POLTRONA-BOUCLE');
+});

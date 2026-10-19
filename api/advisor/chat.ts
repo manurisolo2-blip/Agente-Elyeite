@@ -124,6 +124,11 @@ export default async function handler(req: any, res: any) {
   if (hasValidApiKey) {
     const ai = new GoogleGenAI({
       apiKey: resolvedApiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
     });
 
     const historyContents = formatGeminiHistory(body.history);
@@ -193,42 +198,45 @@ export default async function handler(req: any, res: any) {
     ];
 
     const timeoutMs = hasImage ? 8000 : 4000;
+    const candidateModels = [OFFICIAL_MODEL, 'gemini-3.8-flash'];
 
-    try {
-      const timeoutPromise = new Promise<null>((resolve) =>
-        setTimeout(() => resolve(null), timeoutMs)
-      );
-      const apiPromise = ai.models.generateContent({
-        model: OFFICIAL_MODEL,
-        contents,
-        config: {
-          systemInstruction,
-          responseMimeType: 'application/json',
-          responseSchema: ADVISOR_RESPONSE_SCHEMA,
-        },
-      });
-
-      const response = await Promise.race([apiPromise, timeoutPromise]);
-      if (response && response.text) {
-        const parsed = JSON.parse(response.text);
-        const structured = sanitizeAdvisorResponse(parsed, activeBrandConfig, {
-          hasImage,
-          userQuery: promptText,
-          visualClues: body.visualClues,
-        });
-
-        res.status(200).json({
-          structured,
-          meta: {
-            source: 'gemini-live',
-            modelUsed: OFFICIAL_MODEL,
-            latencyMs: Date.now() - startTime,
+    for (const modelToTry of candidateModels) {
+      try {
+        const timeoutPromise = new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), timeoutMs)
+        );
+        const apiPromise = ai.models.generateContent({
+          model: modelToTry,
+          contents,
+          config: {
+            systemInstruction,
+            responseMimeType: 'application/json',
+            responseSchema: ADVISOR_RESPONSE_SCHEMA,
           },
         });
-        return;
+
+        const response = await Promise.race([apiPromise, timeoutPromise]);
+        if (response && response.text) {
+          const parsed = JSON.parse(response.text);
+          const structured = sanitizeAdvisorResponse(parsed, activeBrandConfig, {
+            hasImage,
+            userQuery: promptText,
+            visualClues: body.visualClues,
+          });
+
+          res.status(200).json({
+            structured,
+            meta: {
+              source: 'gemini-live',
+              modelUsed: modelToTry,
+              latencyMs: Date.now() - startTime,
+            },
+          });
+          return;
+        }
+      } catch (err: any) {
+        console.error(`Error en Gemini API (${modelToTry}):`, err?.message || err);
       }
-    } catch (err) {
-      console.error("Error en Gemini API:", err);
     }
   }
 
