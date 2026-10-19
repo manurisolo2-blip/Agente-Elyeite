@@ -104,6 +104,46 @@ async function startServer() {
 
     const systemInstruction = buildAdvisorSystemInstruction(activeBrandConfig);
 
+    const promptText =
+      userMessage ||
+      (hasImage
+        ? 'Analizá esta foto y recomendame el o los muebles exactos de BRAND_CONFIG.products que mejor resuelvan mi espacio.'
+        : 'Hola, necesito asesoramiento sobre el catálogo de muebles.');
+
+    let resolvedBase64 = body.imageBase64 || '';
+    let resolvedMimeType = body.imageMimeType || 'image/jpeg';
+
+    if (resolvedBase64.includes(';base64,')) {
+      const parts = resolvedBase64.split(';base64,');
+      resolvedBase64 = parts[1];
+      if (!body.imageMimeType && parts[0].startsWith('data:')) {
+        resolvedMimeType = parts[0].replace('data:', '').trim();
+      }
+    }
+
+    if (!resolvedBase64 && body.imageUrl) {
+      try {
+        const imgResponse = await fetch(body.imageUrl, {
+          signal: AbortSignal.timeout(6000),
+        });
+        if (imgResponse.ok) {
+          const contentType = imgResponse.headers.get('content-type');
+          if (contentType) {
+            resolvedMimeType = contentType.split(';')[0].trim();
+          }
+          const arrayBuf = await imgResponse.arrayBuffer();
+          resolvedBase64 = Buffer.from(arrayBuf).toString('base64');
+        }
+      } catch (_fetchErr) {
+        // If external image fetch fails, continue with text/visualClues
+      }
+    }
+
+    const fullPromptText =
+      hasImage && body.visualClues && !resolvedBase64
+        ? `${promptText}\n[Contexto visual de la foto adjunta: ${body.visualClues}]`
+        : promptText;
+
     const resolvedApiKey = (body.apiKey || '').trim() || (process.env.GEMINI_API_KEY || '').trim();
     const hasValidApiKey =
       Boolean(resolvedApiKey) && resolvedApiKey !== 'MY_GEMINI_API_KEY' && resolvedApiKey.length > 10;
@@ -125,35 +165,6 @@ async function startServer() {
         | { inlineData: { mimeType: string; data: string } }
       > = [];
 
-      let resolvedBase64 = body.imageBase64 || '';
-      let resolvedMimeType = body.imageMimeType || 'image/jpeg';
-
-      if (resolvedBase64.includes(';base64,')) {
-        const parts = resolvedBase64.split(';base64,');
-        resolvedBase64 = parts[1];
-        if (!body.imageMimeType && parts[0].startsWith('data:')) {
-          resolvedMimeType = parts[0].replace('data:', '').trim();
-        }
-      }
-
-      if (!resolvedBase64 && body.imageUrl) {
-        try {
-          const imgResponse = await fetch(body.imageUrl, {
-            signal: AbortSignal.timeout(6000),
-          });
-          if (imgResponse.ok) {
-            const contentType = imgResponse.headers.get('content-type');
-            if (contentType) {
-              resolvedMimeType = contentType.split(';')[0].trim();
-            }
-            const arrayBuf = await imgResponse.arrayBuffer();
-            resolvedBase64 = Buffer.from(arrayBuf).toString('base64');
-          }
-        } catch (_fetchErr) {
-          // If external image fetch fails, continue with text/visualClues
-        }
-      }
-
       if (hasImage && resolvedBase64) {
         currentParts.push({
           inlineData: {
@@ -162,17 +173,6 @@ async function startServer() {
           },
         });
       }
-
-      const promptText =
-        userMessage ||
-        (hasImage
-          ? 'Analizá esta foto y recomendame el o los muebles exactos de BRAND_CONFIG.products que mejor resuelvan mi espacio.'
-          : 'Hola, necesito asesoramiento sobre el catálogo de muebles.');
-
-      const fullPromptText =
-        hasImage && body.visualClues && !resolvedBase64
-          ? `${promptText}\n[Contexto visual de la foto adjunta: ${body.visualClues}]`
-          : promptText;
 
       currentParts.push({ text: fullPromptText });
 
@@ -227,6 +227,88 @@ async function startServer() {
       }
     }
 
+    // Intento 2: Fallback de IA Real en Vivo (Pollinations OpenAI)
+    try {
+      const openAiMessages: Array<{ role: string; content: string }> = [
+        { role: 'system', content: systemInstruction },
+      ];
+
+      if (Array.isArray(body.history)) {
+        for (const turn of body.history) {
+          if (!turn || typeof turn !== 'object') continue;
+          const role = turn.role === 'model' || turn.role === 'assistant' ? 'assistant' : 'user';
+          let content = '';
+          if (typeof turn.content === 'string') {
+            content = turn.content;
+          } else if (typeof turn.text === 'string') {
+            content = turn.text;
+          } else if (Array.isArray(turn.parts)) {
+            content = turn.parts.map((p: any) => p?.text || '').join(' ').trim();
+          }
+          if (content.trim().length > 0) {
+            openAiMessages.push({ role, content: content.trim() });
+          }
+        }
+      }
+
+      openAiMessages.push({ role: 'user', content: fullPromptText });
+
+      const controller = new AbortController();
+      const pollTimeout = setTimeout(() => controller.abort(), 25000);
+
+      const pollRes = await fetch('https://text.pollinations.ai/openai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          'Referer': 'https://elyeite.com',
+        },
+        body: JSON.stringify({
+          model: 'openai',
+          response_format: { type: 'json_object' },
+          messages: openAiMessages,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(pollTimeout);
+
+      if (pollRes.ok) {
+        const pollData = (await pollRes.json()) as any;
+        const rawContent = pollData?.choices?.[0]?.message?.content;
+        if (rawContent && typeof rawContent === 'string') {
+          let parsedJson: any = null;
+          try {
+            parsedJson = JSON.parse(rawContent);
+          } catch (_err) {
+            const match = rawContent.match(/\{[\s\S]*\}/);
+            if (match) {
+              parsedJson = JSON.parse(match[0]);
+            }
+          }
+
+          if (parsedJson && typeof parsedJson === 'object') {
+            const structured = sanitizeAdvisorResponse(parsedJson, activeBrandConfig, {
+              hasImage,
+              userQuery: promptText,
+              visualClues: body.visualClues,
+            });
+
+            res.json({
+              structured,
+              meta: {
+                source: 'pollinations-live',
+                modelUsed: 'openai',
+                latencyMs: Date.now() - startTime,
+              },
+            });
+            return;
+          }
+        }
+      }
+    } catch (pollErr: any) {
+      console.error('Error en Pollinations Live IA:', pollErr?.message || pollErr);
+    }
+
     const structured = generateDeterministicAdvisorResponse(
       userMessage,
       activeBrandConfig,
@@ -240,7 +322,7 @@ async function startServer() {
         source: 'local-fallback',
         modelUsed: OFFICIAL_MODEL,
         latencyMs: Math.max(120, Date.now() - startTime),
-        fallbackReason: hasValidApiKey ? 'gemini_api_error_or_timeout' : 'no_api_key_configured',
+        fallbackReason: 'all_live_ai_services_failed_or_timeout',
       },
     });
   });

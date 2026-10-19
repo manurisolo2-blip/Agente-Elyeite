@@ -490,9 +490,55 @@ export function sanitizeAdvisorResponse(
     const rawId = typeof rec.id === 'string' ? rec.id.trim().toUpperCase() : '';
     const rawName = typeof rec.name === 'string' ? rec.name.trim().toLowerCase() : '';
 
-    const catalogProduct =
-      brandConfig.products.find((p) => p.id.toUpperCase() === rawId) ||
-      brandConfig.products.find((p) => rawName.length > 3 && p.name.toLowerCase().includes(rawName));
+    const rawIdUpper = rawId.toUpperCase();
+    const rawNameLower = rawName.toLowerCase();
+
+    // 1. Exact ID
+    let catalogProduct = brandConfig.products.find((p) => p.id.toUpperCase() === rawIdUpper);
+
+    // 2. ID substring / alias
+    if (!catalogProduct && rawIdUpper.length >= 3) {
+      catalogProduct = brandConfig.products.find(
+        (p) => p.id.toUpperCase().includes(rawIdUpper) || rawIdUpper.includes(p.id.toUpperCase())
+      );
+    }
+
+    // 3. Name substring or reverse substring
+    if (!catalogProduct && rawNameLower.length >= 3) {
+      catalogProduct = brandConfig.products.find(
+        (p) => p.name.toLowerCase().includes(rawNameLower) || rawNameLower.includes(p.name.toLowerCase())
+      );
+    }
+
+    // 4. Keyword matching against product name & ID
+    if (!catalogProduct) {
+      const combinedItemText = `${rawIdUpper} ${rawNameLower}`;
+      if (combinedItemText.includes('SURE')) {
+        catalogProduct = brandConfig.products.find((p) => p.id === 'EY-SURE');
+      } else if (
+        combinedItemText.includes('SOFA') ||
+        combinedItemText.includes('SOFÁ') ||
+        combinedItemText.includes('3 CUERPOS') ||
+        combinedItemText.includes('TRES CUERPOS')
+      ) {
+        catalogProduct = brandConfig.products.find((p) => p.id === 'EY-SOFA-3C');
+      } else if (
+        combinedItemText.includes('COMEDOR') ||
+        (combinedItemText.includes('MESA') && !combinedItemText.includes('RATONA'))
+      ) {
+        catalogProduct = brandConfig.products.find((p) => p.id === 'EY-MESA-COMEDOR');
+      } else if (combinedItemText.includes('RATONA') || combinedItemText.includes('BLOQUE')) {
+        catalogProduct = brandConfig.products.find((p) => p.id === 'EY-MESA-RATONA');
+      } else if (combinedItemText.includes('SILLA') || combinedItemText.includes('PANA')) {
+        catalogProduct = brandConfig.products.find((p) => p.id === 'EY-SILLA-PANA');
+      } else if (
+        combinedItemText.includes('BOUCLE') ||
+        combinedItemText.includes('BOUCLÉ') ||
+        combinedItemText.includes('POLTRONA')
+      ) {
+        catalogProduct = brandConfig.products.find((p) => p.id === 'EY-POLTRONA-BOUCLE');
+      }
+    }
 
     if (catalogProduct && !seenIds.has(catalogProduct.id)) {
       seenIds.add(catalogProduct.id);
@@ -514,6 +560,37 @@ export function sanitizeAdvisorResponse(
     }
 
     if (validProducts.length >= 2) break;
+  }
+
+  // If no products matched directly from recommendedProducts, inspect advisorMessage and userQuery
+  if (validProducts.length === 0) {
+    const msgLower = `${advisorMessage} ${options.userQuery}`.toLowerCase();
+    for (const p of brandConfig.products) {
+      const pNameLower = p.name.toLowerCase();
+      if (
+        msgLower.includes(p.id.toLowerCase()) ||
+        msgLower.includes(pNameLower) ||
+        (p.id === 'EY-SURE' && msgLower.includes('sure')) ||
+        (p.id === 'EY-SOFA-3C' && (msgLower.includes('3 cuerpos') || msgLower.includes('sofá') || msgLower.includes('sofa'))) ||
+        (p.id === 'EY-MESA-COMEDOR' && (msgLower.includes('comedor') || (msgLower.includes('mesa') && !msgLower.includes('ratona')))) ||
+        (p.id === 'EY-MESA-RATONA' && msgLower.includes('ratona')) ||
+        (p.id === 'EY-SILLA-PANA' && (msgLower.includes('silla') || msgLower.includes('pana'))) ||
+        (p.id === 'EY-POLTRONA-BOUCLE' && (msgLower.includes('bouclé') || msgLower.includes('boucle') || msgLower.includes('poltrona')))
+      ) {
+        if (!seenIds.has(p.id)) {
+          seenIds.add(p.id);
+          validProducts.push({
+            id: p.id,
+            matchReason: p.features[0],
+            name: p.name,
+            price: p.price,
+            imageUrl: p.imageUrl,
+            buyUrl: p.buyUrl,
+          });
+        }
+      }
+      if (validProducts.length >= 2) break;
+    }
   }
 
   if (validProducts.length === 0) {
