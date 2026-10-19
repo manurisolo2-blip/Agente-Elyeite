@@ -5,6 +5,8 @@ import {
   sanitizeAdvisorResponse,
   generateDeterministicAdvisorResponse,
   formatGeminiHistory,
+  cleanAssistantTurnText,
+  cleanAndParseJson,
 } from '../../src/utils/advisorEngine.ts';
 import type { BrandConfig, ChatHistoryTurn } from '../../src/utils/advisorEngine.ts';
 
@@ -197,7 +199,7 @@ export default async function handler(req: any, res: any) {
       },
     ];
 
-    const timeoutMs = hasImage ? 8000 : 4000;
+    const timeoutMs = hasImage ? 15000 : 12000;
     const candidateModels = [OFFICIAL_MODEL, 'gemini-3.8-flash'];
 
     for (const modelToTry of candidateModels) {
@@ -258,6 +260,9 @@ export default async function handler(req: any, res: any) {
         } else if (Array.isArray(turn.parts)) {
           content = turn.parts.map((p: any) => p?.text || '').join(' ').trim();
         }
+        if (role === 'assistant') {
+          content = cleanAssistantTurnText(content);
+        }
         if (content.trim().length > 0) {
           openAiMessages.push({ role, content: content.trim() });
         }
@@ -289,15 +294,7 @@ export default async function handler(req: any, res: any) {
       const pollData = (await pollRes.json()) as any;
       const rawContent = pollData?.choices?.[0]?.message?.content;
       if (rawContent && typeof rawContent === 'string') {
-        let parsedJson: any = null;
-        try {
-          parsedJson = JSON.parse(rawContent);
-        } catch (_err) {
-          const match = rawContent.match(/\{[\s\S]*\}/);
-          if (match) {
-            parsedJson = JSON.parse(match[0]);
-          }
-        }
+        const parsedJson = cleanAndParseJson(rawContent);
 
         if (parsedJson && typeof parsedJson === 'object') {
           const structured = sanitizeAdvisorResponse(parsedJson, activeBrandConfig, {

@@ -8,6 +8,8 @@ import {
   sanitizeAdvisorResponse,
   generateDeterministicAdvisorResponse,
   formatGeminiHistory,
+  cleanAssistantTurnText,
+  EL_YEITE_KNOWLEDGE_BASE,
 } from './advisorEngine.ts';
 
 test('BRAND_CONFIG contains exactly 6 furniture products with real photography URLs, theme, quickPrompts, and shippingAndReturns', () => {
@@ -191,3 +193,44 @@ test('generateDeterministicAdvisorResponse handles compact space with stain-resi
   assert.equal(compact.recommendedProducts[0].id, 'EY-SURE');
   assert.equal(compact.recommendedProducts[1].id, 'EY-POLTRONA-BOUCLE');
 });
+
+test('cleanAssistantTurnText extracts advisorMessage and closingQuestion from JSON and passes plain text through', () => {
+  const jsonInput = JSON.stringify({
+    visualAnalysis: null,
+    advisorMessage: 'Para limpiar manchas de café, absorbé con un paño seco.',
+    recommendedProducts: [],
+    closingQuestion: '¿Querés que te preparemos el pedido?'
+  });
+  const cleaned = cleanAssistantTurnText(jsonInput);
+  assert.equal(cleaned, 'Para limpiar manchas de café, absorbé con un paño seco. ¿Querés que te preparemos el pedido?');
+
+  const plain = '¡Hola! Qué bueno saludarte.';
+  assert.equal(cleanAssistantTurnText(plain), plain);
+});
+
+test('sanitizeAdvisorResponse preserves empty recommendedProducts array when provided by candidate', () => {
+  const candidate = {
+    visualAnalysis: null,
+    advisorMessage: 'Abonando en efectivo o transferencia tenés un 15% a 20% de descuento directo.',
+    recommendedProducts: [],
+    closingQuestion: '¿A qué localidad sería el envío para coordinar?'
+  };
+  const sanitized = sanitizeAdvisorResponse(candidate, DEFAULT_BRAND_CONFIG, {
+    hasImage: false,
+    userQuery: 'buenísimo, tienen descuento en efectivo?'
+  });
+  assert.equal(sanitized.recommendedProducts.length, 0);
+  assert.equal(sanitized.advisorMessage, candidate.advisorMessage);
+  assert.equal(sanitized.closingQuestion, candidate.closingQuestion);
+});
+
+test('buildAdvisorSystemInstruction integrates EL_YEITE_KNOWLEDGE_BASE with fabric guide, Petiribi and financing', () => {
+  const instruction = buildAdvisorSystemInstruction(DEFAULT_BRAND_CONFIG);
+  assert.ok(instruction.includes('BASE DE CONOCIMIENTO OFICIAL DEL TALLER (EL YEITE)'));
+  assert.ok(instruction.includes('Pana Antimanchas'));
+  assert.ok(instruction.includes('Lino Pesado'));
+  assert.ok(instruction.includes('Petiribí'));
+  assert.ok(instruction.includes('15 a 25 días'));
+  assert.ok(instruction.includes('6 cuotas sin interés'));
+});
+
